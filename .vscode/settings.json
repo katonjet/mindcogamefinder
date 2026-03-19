@@ -1,0 +1,13 @@
+{
+  "tailwindCSS.classAttributes": [//to make using tailwind in variables easy in IntelliSense
+    "class",
+    "className",
+    ".*Styles.*"
+  ],
+  "tailwindCSS.experimental.classRegex": [
+    ["\\w+Styles\\s*:\\s*['\"`]([^'\"`]*)['\"`]"], //to make using tailwind in JSON easy with IntelliSense
+  ],
+  "editor.quickSuggestions": {
+    "strings": true
+  }
+}
