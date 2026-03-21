@@ -2,8 +2,9 @@
 
 import { setGameBackdrop } from "@/app/frontend/Background";
 import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel } from "@/app/frontend/Common";
-import { Glass } from "@/app/frontend/Glass";
+import { Glass, onClickAmberStyles } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
+import { sendNewGameReview } from "@/lib/user";
 import React, { useEffect, useState } from "react";
 
 function TestBar () {
@@ -133,6 +134,46 @@ export default function Game({params}: {params: {gameid: string;}}) {
     const [rating, setRating] = useState("0");
     const [genres, setGenres] = useState([]);
 
+    //For game review
+    const [myReviewRating, setMyReviewRating] = useState(0);
+    const [myReviewTitle, setMyReviewTitle] = useState("");
+    const [myReviewComment, setMyReviewComment] = useState("");
+
+    function starSelect (rate: number) {
+
+        (document.getElementById('star1') as HTMLElement).innerHTML = 'B';
+        (document.getElementById('star2') as HTMLElement).innerHTML = 'B';
+        (document.getElementById('star3') as HTMLElement).innerHTML = 'B';
+        (document.getElementById('star4') as HTMLElement).innerHTML = 'B';
+        (document.getElementById('star5') as HTMLElement).innerHTML = 'B';
+        setMyReviewRating(0);
+
+        //check range
+        if (rate >= 1 && rate <= 5){
+            setMyReviewRating(rate);
+            if (rate >= 1) (document.getElementById('star1') as HTMLElement).innerHTML = 'F';
+            if (rate >= 2) (document.getElementById('star2') as HTMLElement).innerHTML = 'F';
+            if (rate >= 3) (document.getElementById('star3') as HTMLElement).innerHTML = 'F';
+            if (rate >= 4) (document.getElementById('star4') as HTMLElement).innerHTML = 'F';
+            if (rate >= 5) (document.getElementById('star5') as HTMLElement).innerHTML = 'F';
+        }
+    }
+
+    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {setMyReviewTitle(event.target.value);};
+    const handleCommentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {setMyReviewComment(event.target.value);};
+
+    const sendReviewToServer = () => {
+        
+        const asyncFn = async ()=> {
+            const { gameid } = await params;
+            const res = await sendNewGameReview(gameid,myReviewRating,myReviewTitle,myReviewComment);
+            console.log(res);
+        }
+
+        asyncFn();
+
+    }
+
     useEffect(() => {
 
         const asyncFunc = async () => {
@@ -180,16 +221,61 @@ export default function Game({params}: {params: {gameid: string;}}) {
                 </div>
             </div>
 
-            <FlexContainer>
+            {/*<FlexContainer>
                 <GamePanel className="flex-1 overflow-hidden">
                     <H1>Screenshots</H1>
                     <TestBar2/>
                 </GamePanel>
-            </FlexContainer>
+            </FlexContainer>*/}
 
             <FlexContainer>
                 <GamePanel className="flex-1">
-                    <H1>Review</H1>
+                    <div className="flex mb-6">
+                        <H1 className="flex-5">Review</H1>
+                        <div>
+                            <Glass className="max-h-min p-3 flex justify-center align-middle rl-7 text-7xl rounded-[100px]" onClick={()=>{}}>
+                                <div className="m-4 leading-10">+</div>
+                            </Glass>
+                        </div>
+                    </div>
+
+                    {/* Game reviewing panel */}
+                    <Glass className="p-4">
+
+                        <div className="flex mt-4 mb-4">
+                            <div className="text-right flex-1/150">Rating</div>
+                            {/*<input className="ml-5 rounded-4xl bg-black/60 flex-6 p-2" type="text" name="" id="" />*/}
+                            <div className={`flex-6 ml-5 flex ${GlyphClass().className} text-3xl leading-7`}>
+                                <div id='star1' onClick={()=>{starSelect(1)}}>B</div>
+                                <div id='star2' onClick={()=>{starSelect(2)}}>B</div>
+                                <div id='star3' onClick={()=>{starSelect(3)}}>B</div>
+                                <div id='star4' onClick={()=>{starSelect(4)}}>B</div>
+                                <div id='star5' onClick={()=>{starSelect(5)}}>B</div>
+                            </div>
+                        </div>
+
+                        <div className="flex mt-4 mb-4">
+                            <div className="text-right flex-1/150">Title</div>
+                            <input onChange={handleTitleChange} className="ml-5 rounded-4xl bg-black/60 flex-6 p-2" type="text" name="" id="title" />
+                        </div>
+
+                        <div className="flex mt-4 mb-4">
+                            <div className="text-right flex-1/150">Comment</div>
+                            <textarea onChange={handleCommentChange} className="ml-5 rounded-2xl bg-black/60 flex-6 p-2" name="" id="comment"></textarea>
+                        </div>
+
+                        <div className="flex flex-row mt-4 mb-4">
+                            <div className="flex-1"></div>
+                            <div className="flex-6 ml-5 flex justify-start">
+                                <Glass className="p-3 m-1" onClick={sendReviewToServer}>Submit</Glass>
+                                <Glass className={`${onClickAmberStyles} p-3 m-1`} onClick={()=>{}} >Cancel</Glass>
+                            </div>
+                        </div>
+
+
+                    </Glass>
+
+                    {/* other game reviews */}
 
                 </GamePanel>
             </FlexContainer>

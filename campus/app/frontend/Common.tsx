@@ -1,9 +1,9 @@
 import { Glass } from "./Glass";
 
-export type divCommon = {children?: React.ReactNode; style?: React.CSSProperties; className?: string;};
+export type divCommon = {children?: React.ReactNode; style?: React.CSSProperties; className?: string; onClick?: (()=>void);};
 
 export function H1({children, style, className}: divCommon){
-    return <div className={`text-6xl mb-6 font-bold ${className}`} style={style}>{children}</div>
+    return <div className={`text-6xl mb-4 mt-4 font-bold ${className}`} style={style}>{children}</div>
 }
 
 export function H2({children, style, className}: divCommon){

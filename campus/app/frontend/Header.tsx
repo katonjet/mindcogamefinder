@@ -31,7 +31,7 @@ export default function Header(){
           Search
         </Glass>
         <div className={`flex-1 flex m-1`}>
-            <Glass className={`p-0 ml-1 mr-1 hover:bg-blue-700 active:bg-blue-900 transition-colors delay-50 text-shadow-none`}>
+            <Glass className={`p-0 ml-1 mr-1 hover:bg-teal-600 active:bg-teal-900 transition-colors delay-50 text-shadow-none`}>
                 <Link href={'/user'} className="flex justify-center flex-row">
                   <span className={`${GlyphClass().className} text-5xl`}>A</span>
                   <div className="p-3 pl-1">{username}</div>
