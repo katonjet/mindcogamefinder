@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
+
+    public $timestamps = false;
     protected $table = 'reviews';
     protected $fillable = [
         'user_id',
@@ -21,7 +24,35 @@ class Review extends Model
     }
 
     //get the game that this comment belogs to
-    public function getGame(){
-        return $this->belongsTo(Game::class, 'game_id');
+    protected function gameId(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => $value,
+        );
+    }
+
+    protected function title(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => $value,
+        );
+    }
+
+    protected function comment(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => $value,
+        );
+    }
+
+    protected function rating(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => $value,
+        );
     }
 }

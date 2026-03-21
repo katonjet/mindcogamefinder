@@ -19,7 +19,6 @@ class GameSample extends Seeder
             'releasedate' => '2026-05-29',
             'platforms' => json_encode(['PC', 'Steam Deck', 'Whatever']),
             'genres' => json_encode(['Action', 'Adventure']),
-            'avgrating' => 4.31,
             'backdropimagepath' => '/storage/game_backdrop/3qoD0W7z5PLy1osXa6FFwo2xWYsX4qvwBn8L4zMN.jpg'
         ]);
     }

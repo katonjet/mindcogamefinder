@@ -26,9 +26,9 @@ class GameController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Game $game)
     {
-        $game =  Game::find($id);
+        //$game =  Game::find($id);
         return $game ? response()->json($game) : response()->json(null, 404);
     }
 

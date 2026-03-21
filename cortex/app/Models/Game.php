@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Game extends Model
 {
@@ -19,7 +20,8 @@ class Game extends Model
         'genres',
         'backdropimagepath',
         //'posterimagepath',
-        'avgrating'
+        'avgrating',
+        'avgcount',
         ];
 
     protected $casts = [
@@ -66,8 +68,19 @@ class Game extends Model
         return $this->posterimagepath;
     }*/
 
-    public function getGameRating(){
-        return $this->avgrating;
+    protected function avgrating(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => $value,
+        );
+    }
+    protected function avgcount(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value,
+            set: fn ($value) => $value,
+        );
     }
 
     //TRIGGERED AUTOMATICALLY AFTER REVIEW ENTRY

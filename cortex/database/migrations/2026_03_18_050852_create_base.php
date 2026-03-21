@@ -73,7 +73,8 @@ return new class extends Migration
             $table->json('genres')->nullable(false); //Genres as JSON array. default none
             $table->text('backdropimagepath'); // URI path to uploaded backdrop image
             //$table->text('posterimagepath'); // URI path to uploaded poster image
-            $table->decimal('avgrating', 3, 1)->default(0.0)->nullable(false); //Auto calculated average rating score from 0 to 5. default zero (0.0[0])
+            $table->decimal('avgrating', 3, 1)->default(0.0)->nullable(false); //Auto calculated average rating score from 1 to 5. default zero (0.0[0])
+            $table->decimal('avgcount')->default(0.0)->nullable(false); //total review count for efficient average calculation
         });
 
         //Reviews
@@ -107,7 +108,6 @@ return new class extends Migration
         Schema::dropIfExists('games');
         Schema::dropIfExists('developers');
 
-        //Schema::dropIfExists('g_users');
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('profileimagepath');
             $table->dropColumn('username');
@@ -115,5 +115,6 @@ return new class extends Migration
 
         Schema::dropIfExists('genres');
         Schema::dropIfExists('systemplatforms');
+
     }
 };

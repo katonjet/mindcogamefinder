@@ -19,9 +19,9 @@ async function checkCsrf(){
         .some(cookie => cookie.startsWith('XSRF-TOKEN='));
 
     if (!hasXsrf){
-        //api.get('/sanctum/csrf-cookie',{withCredentials: true});
+        api.get('/sanctum/csrf-cookie',{withCredentials: true});
     }
-    api.get('/sanctum/csrf-cookie'); //to check if repeated refresh is needed or not
+    //api.get('/sanctum/csrf-cookie'); //to check if repeated refresh is needed or not
 
 }
 
@@ -148,6 +148,47 @@ export async function logoutUser() {
 
     setReactState();
 
+    return dataStream.data;
+
+}
+
+
+export async function sendNewGameReview(gameid: string, rating: number, title?: string, comment?: string){
+
+    await checkCsrf();
+
+    const userData_id = JSON.parse(localStorage.getItem('userData') as string).id;
+
+    const dataStream = await api.post('/api/reviews',{
+        userid: userData_id,
+        gameid: Number(gameid),
+        rating: rating,
+        title: (title) ? title : null,
+        comment: comment ? comment : null,
+    });
+
+    return dataStream.data;
+
+}
+
+//for reviewing and deleting reviews
+export async function getUsersGameReviews() {
+
+    await checkCsrf();
+
+    const userData_id = JSON.parse(localStorage.getItem('userData') as string).id;
+
+    const dataStream = await api.get(`/api/reviews/user/${userData_id}`);
+
+    return dataStream.data;
+
+    
+}
+
+export async function deleteGameReview(reviewid:number){
+
+    await checkCsrf();
+    const dataStream = await api.delete(`/api/reviews/${reviewid}`);
     return dataStream.data;
 
 }
