@@ -39,7 +39,7 @@ You will need to setup each project in the given order of the HOW-TO steps.
 
 ## HOW-TO setup Cortex (Laravel)
 
-> **IMPORTANT**: MySQL must be run before running Laravel server. Refer to ```@/cortex/.env``` and ```@/docker-compose.yml``` file for credential setup.
+> **IMPORTANT**: (For non-Dev container setup only) MySQL must be run before running Laravel server. Refer to ```@/cortex/.env``` and ```@/docker-compose.yml``` file for credential setup.
 
 Go into the project folder:
 ```bash
