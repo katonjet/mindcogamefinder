@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
         $middleware->append(\App\Http\Middleware\SaveMeAuth::class);
+        $middleware->append(\App\Http\Middleware\CorsMe::class); //Fix for chrome / chromium based browser
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
