@@ -4,6 +4,7 @@ import { setGameBackdrop } from "@/app/frontend/Background";
 import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel } from "@/app/frontend/Common";
 import { Glass, onClickAmberStyles } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
+import LoadingPage, { DelayLoad } from "@/app/frontend/LoadingPage";
 import { sendNewGameReview } from "@/lib/user";
 import React, { useEffect, useState } from "react";
 
@@ -72,7 +73,7 @@ function RatingPill({rating}: {rating: string}){
         if (partialStarPercent > 0 && partialStarPercent < 50) {return "C";}
         if (partialStarPercent >= 50 && partialStarPercent < 75) {return "D";}
         if (partialStarPercent >= 75 && partialStarPercent < 100) {return "E";}
-        return "B";
+        return "";
     };
 
     const fullStarString = function () {
@@ -129,6 +130,9 @@ async function getGame(gameid: string){
 
 export default function Game({params}: {params: {gameid: string;}}) {
 
+    //Loading page
+    const [loading, setLoading] = useState(true);
+
     const [title, setTitle] = useState("A game");
     const [desc, setDesc] = useState("A game description");
     const [rating, setRating] = useState("0");
@@ -184,7 +188,10 @@ export default function Game({params}: {params: {gameid: string;}}) {
                 setDesc(gameData.desc);
                 setRating(gameData.avgrating);
                 setGenres(JSON.parse(gameData.genres));
+                
+                await DelayLoad(2000);
                 setGameBackdrop(`http://localhost:8000${gameData.backdropimagepath}`);
+                setLoading(false);
             }
         };
 
@@ -194,7 +201,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
 
     //const { gameid } = await params;
     //textShadow: `3px 3px 30px rgba(10,10,10), -3px -3px 30px rgba(10,10,10)`
-    return(
+    const DefaultPage = (
         <div className="m-14 ml-40 mr-40">
             <div className="m-8 min-h-[60vh] flex">
                 
@@ -211,8 +218,6 @@ export default function Game({params}: {params: {gameid: string;}}) {
                             <RatingPill rating={rating}/>
                         </PillContainer>
                         <PillContainer>
-                            {/*<Pill>RPG</Pill>
-                            <Pill>Action</Pill>*/}
                             {genres.map((genre) => {
                                 return <Pill key={genre}>{genre}</Pill>;
                             })}
@@ -282,5 +287,11 @@ export default function Game({params}: {params: {gameid: string;}}) {
 
         </div>
     );
+
+    if (loading) {
+        return LoadingPage();
+    } else {
+        return DefaultPage;
+    }
 
 }
