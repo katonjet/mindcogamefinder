@@ -73,7 +73,8 @@ return new class extends Migration
             $table->json('genres')->nullable(false); //Genres as JSON array. default none
             $table->text('backdropimagepath'); // URI path to uploaded backdrop image
             //$table->text('posterimagepath'); // URI path to uploaded poster image
-            $table->decimal('avgrating', 3, 1)->default(0.0)->nullable(false); //Auto calculated average rating score from 1 to 5. default zero (0.0[0])
+            //$table->decimal('avgrating', 3, 1)->default(0.0)->nullable(false); //Auto calculated average rating score from 1 to 5. default zero (0.0[0])
+            $table->decimal('avgrating')->default(0.0)->nullable(false); //Auto calculated average rating score from 1 to 5. default zero (0.0[0])
             $table->decimal('avgcount')->default(0.0)->nullable(false); //total review count for efficient average calculation
         });
 
@@ -83,8 +84,8 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable(false)->constrained('users'); //user who is reviewing
             $table->foreignId('game_id')->nullable(false)->constrained('games'); //game being reviewed
             $table->decimal('rating', 3, 1)->nullable(false); //Rating. used to calculate new game average (Range - 0 to 5)
-            $table->text('title'); //Optional Title of the comment
-            $table->text('comment'); //Optional User Comment/opinion
+            $table->text('title')->nullable(true); //Optional Title of the comment
+            $table->text('comment')->nullable(true); //Optional User Comment/opinion
         });
 
         //Collections
