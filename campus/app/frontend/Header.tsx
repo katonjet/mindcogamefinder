@@ -6,15 +6,21 @@ import { isLoggedIn, ReactState_, registerReactComp } from "@/lib/user";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+//only one function exists (index zero)
+var hideHeader_: ((arg0: boolean)=>void);
+export function hideHeaderFn(state: boolean){if (hideHeader_) hideHeader_(state)}
+
 export default function Header(){
 
   const headerStyles: string = 'p-3 m-1';
 
   const [username, setUsername] = useState("Login");
+  const [hideHeader, setHideHeader] = useState(false);
 
   useEffect(() => {
-
+    hideHeader_ = setHideHeader; //for dynamic toggle to show and hide header based on page context
     registerReactComp({dataColumn: 'username', reactFunction: setUsername})
+
     if (isLoggedIn()) setUsername(
         JSON.parse(localStorage.getItem('userData') as string).username
     );
@@ -23,7 +29,7 @@ export default function Header(){
 
   return (
     <>
-    <div className="flex mt-3">
+    <div className={`flex ${(hideHeader) ? 'h-0 min-h-0 m-0 p-0' : 'mt-3'}`}>
         <div className={`flex-1 text-center font-[1000] text-3xl p-0 m-1`}>
             <Link href={'/'}>GameFinder</Link>
         </div>
