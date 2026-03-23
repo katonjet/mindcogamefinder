@@ -153,7 +153,7 @@ export async function logoutUser() {
 }
 
 
-export async function sendNewGameReview(gameid: string, rating: number, title?: string, comment?: string){
+export async function sendNewGameReview(gameid: number, rating: number, title?: string, comment?: string){
 
     await checkCsrf();
 
@@ -161,17 +161,26 @@ export async function sendNewGameReview(gameid: string, rating: number, title?: 
 
     const dataStream = await api.post('/api/reviews',{
         userid: userData_id,
-        gameid: Number(gameid),
+        gameid: gameid,
         rating: rating,
-        title: (title) ? title : null,
-        comment: comment ? comment : null,
+        title: (title) ? title : "",
+        comment: (comment) ? comment : "",
     });
 
     return dataStream.data;
 
 }
 
-//for reviewing and deleting reviews
+//For game page
+export async function getGameReviews(gameid: number) {
+    await checkCsrf();
+
+    const dataStream = await api.get(`/api/reviews/game/${gameid}`);
+
+    return dataStream.data;
+}
+
+//for creating, updating and deleting reviews
 export async function getUsersGameReviews() {
 
     await checkCsrf();

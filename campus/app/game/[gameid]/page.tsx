@@ -1,12 +1,14 @@
 "use client";
 
 import { setGameBackdrop } from "@/app/frontend/Background";
-import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel } from "@/app/frontend/Common";
-import { Glass, onClickAmberStyles } from "@/app/frontend/Glass";
+import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel, H2 } from "@/app/frontend/Common";
+import { Glass } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
 import LoadingPage, { DelayLoad } from "@/app/frontend/LoadingPage";
-import { sendNewGameReview } from "@/lib/user";
+import { getGameReviews, getUsersGameReviews, sendNewGameReview } from "@/lib/user";
 import React, { useEffect, useState } from "react";
+import Review from "../Review";
+import { hideHeaderFn } from "@/app/frontend/Header";
 
 function TestBar () {
 
@@ -136,52 +138,36 @@ export default function Game({params}: {params: {gameid: string;}}) {
     const [title, setTitle] = useState("A game");
     const [desc, setDesc] = useState("A game description");
     const [rating, setRating] = useState("0");
+    const [game_id, setGameId] = useState("1");
     const [genres, setGenres] = useState([]);
 
-    //For game review
-    const [myReviewRating, setMyReviewRating] = useState(0);
-    const [myReviewTitle, setMyReviewTitle] = useState("");
-    const [myReviewComment, setMyReviewComment] = useState("");
+    //For game review writing
+    const [showReviewPopup,setShowReviewPopup] = useState(false);
 
-    function starSelect (rate: number) {
+    //for listing existing game reviews
+    const [myReviewList, setMyReviewList] = useState([]);
+    const [reviewListRefresh, setReviewListRefresh] = useState(false); //toggle based trigger
+    
+        useEffect(()=>{
+            const asyncFn = async () => {
+                try {
+                    const data = await getGameReviews(Number(game_id));
+                    setMyReviewList(data)
+                    console.log(myReviewList)
+                } catch (error) {
+                    console.log("Cannot fetch reviews");
+                }
+    
+            };
 
-        (document.getElementById('star1') as HTMLElement).innerHTML = 'B';
-        (document.getElementById('star2') as HTMLElement).innerHTML = 'B';
-        (document.getElementById('star3') as HTMLElement).innerHTML = 'B';
-        (document.getElementById('star4') as HTMLElement).innerHTML = 'B';
-        (document.getElementById('star5') as HTMLElement).innerHTML = 'B';
-        setMyReviewRating(0);
-
-        //check range
-        if (rate >= 1 && rate <= 5){
-            setMyReviewRating(rate);
-            if (rate >= 1) (document.getElementById('star1') as HTMLElement).innerHTML = 'F';
-            if (rate >= 2) (document.getElementById('star2') as HTMLElement).innerHTML = 'F';
-            if (rate >= 3) (document.getElementById('star3') as HTMLElement).innerHTML = 'F';
-            if (rate >= 4) (document.getElementById('star4') as HTMLElement).innerHTML = 'F';
-            if (rate >= 5) (document.getElementById('star5') as HTMLElement).innerHTML = 'F';
-        }
-    }
-
-    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {setMyReviewTitle(event.target.value);};
-    const handleCommentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {setMyReviewComment(event.target.value);};
-
-    const sendReviewToServer = () => {
-        
-        const asyncFn = async ()=> {
-            const { gameid } = await params;
-            const res = await sendNewGameReview(gameid,myReviewRating,myReviewTitle,myReviewComment);
-            console.log(res);
-        }
-
-        asyncFn();
-
-    }
+            asyncFn();
+    },[reviewListRefresh]); //refresh list on toggle
 
     useEffect(() => {
 
         const asyncFunc = async () => {
             const { gameid } = await params;
+            setGameId(gameid.toString());
             const gameData = await getGame(gameid);
             if (gameData) {
                 setTitle(gameData.title);
@@ -199,9 +185,30 @@ export default function Game({params}: {params: {gameid: string;}}) {
 
     },[]);
 
+    const responseReactPopup = (status_: boolean) => {
+        console.log("POPUP STATUS: ",status_)
+        
+        //refresh review list using UseEffect
+        if (status_) setReviewListRefresh(!reviewListRefresh);
+
+        //Delay for server refresh
+        DelayLoad(2000);
+
+        //show header again
+        hideHeaderFn(false);
+
+        //Finally close popup
+        setShowReviewPopup(false)
+    };
+
     //const { gameid } = await params;
     //textShadow: `3px 3px 30px rgba(10,10,10), -3px -3px 30px rgba(10,10,10)`
-    const DefaultPage = (
+    const DefaultPage = (<>
+        {/* Game reviewing panel */}
+        {
+            //(showReviewPopup) ? (<Review gameid={Number(game_id)} effectReturnFn={responseReactPopup} />) : (null)
+            (showReviewPopup) ? (<Review gameid={Number(game_id)} effectReturnFn={responseReactPopup} />) : (null)
+        }
         <div className="m-14 ml-40 mr-40">
             <div className="m-8 min-h-[60vh] flex">
                 
@@ -237,56 +244,31 @@ export default function Game({params}: {params: {gameid: string;}}) {
                 <GamePanel className="flex-1">
                     <div className="flex mb-6">
                         <H1 className="flex-5">Review</H1>
-                        <div>
-                            <Glass className="max-h-min p-3 flex justify-center align-middle rl-7 text-7xl rounded-[100px]" onClick={()=>{}}>
+                        {(showReviewPopup) ? null : (<div>
+                            <Glass className="max-h-min p-3 flex justify-center align-middle rl-7 text-7xl rounded-[100px]" onClick={()=>{setShowReviewPopup(true);hideHeaderFn(true);}}>
                                 <div className="m-4 leading-10">+</div>
                             </Glass>
-                        </div>
+                        </div>)}
                     </div>
 
-                    {/* Game reviewing panel */}
-                    <Glass className="p-4">
+                    {/* Game reviewing panel (check up) */}
 
-                        <div className="flex mt-4 mb-4">
-                            <div className="text-right flex-1/150">Rating</div>
-                            {/*<input className="ml-5 rounded-4xl bg-black/60 flex-6 p-2" type="text" name="" id="" />*/}
-                            <div className={`flex-6 ml-5 flex ${GlyphClass().className} text-3xl leading-7`}>
-                                <div id='star1' onClick={()=>{starSelect(1)}}>B</div>
-                                <div id='star2' onClick={()=>{starSelect(2)}}>B</div>
-                                <div id='star3' onClick={()=>{starSelect(3)}}>B</div>
-                                <div id='star4' onClick={()=>{starSelect(4)}}>B</div>
-                                <div id='star5' onClick={()=>{starSelect(5)}}>B</div>
-                            </div>
-                        </div>
+                    {/* others reviews (myReviewList) */}
+                    <div className="grid">
 
-                        <div className="flex mt-4 mb-4">
-                            <div className="text-right flex-1/150">Title</div>
-                            <input onChange={handleTitleChange} className="ml-5 rounded-4xl bg-black/60 flex-6 p-2" type="text" name="" id="title" />
-                        </div>
-
-                        <div className="flex mt-4 mb-4">
-                            <div className="text-right flex-1/150">Comment</div>
-                            <textarea onChange={handleCommentChange} className="ml-5 rounded-2xl bg-black/60 flex-6 p-2" name="" id="comment"></textarea>
-                        </div>
-
-                        <div className="flex flex-row mt-4 mb-4">
-                            <div className="flex-1"></div>
-                            <div className="flex-6 ml-5 flex justify-start">
-                                <Glass className="p-3 m-1" onClick={sendReviewToServer}>Submit</Glass>
-                                <Glass className={`${onClickAmberStyles} p-3 m-1`} onClick={()=>{}} >Cancel</Glass>
-                            </div>
-                        </div>
-
-
-                    </Glass>
-
-                    {/* other game reviews */}
+                        {myReviewList.map((review: any) => {
+                            return (<Glass key={review.id} className="mb-5 p-10">
+                                        <H2>{review.title}</H2>
+                                        <P>{review.comment}</P>
+                                    </Glass>);
+                        })}
+                    </div>
 
                 </GamePanel>
             </FlexContainer>
 
         </div>
-    );
+    </>);
 
     if (loading) {
         return LoadingPage();

@@ -14,7 +14,7 @@ Route::post('uploadgamebackdrop', [FileUploadTest::class, 'uploadGameBackdrop'])
 
 Route::apiResource('games', GameController::class);
 
-Route::get('reviews/{gameid}', [ReviewController::class, 'getReview']);
+Route::get('reviews/game/{gameid}', [ReviewController::class, 'getReview']);
 Route::middleware([
     SaveMeAuth::class,
     CorsMe::class,

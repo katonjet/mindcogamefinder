@@ -11,10 +11,10 @@ class ReviewController extends Controller
 {
 
     //Get review(s) of a game when loaded (the index function) (login not required)
-    public function getReview(Game $gameid){
+    public function getReview($gameid){
 
         //find game reviews
-        $gamereview = Review::where('game_id', $gameid);
+        $gamereview = Review::where('game_id', $gameid)->get();
         return $gamereview ? response()->json($gamereview) : response()->json(null, 404);
 
     }
@@ -43,8 +43,8 @@ class ReviewController extends Controller
             'gameid' => 'required|numeric',
             'userid' => 'required|numeric',
             'rating' => 'required|numeric|max:5|min:1', //Rating range 1 to 5
-            'title' => 'string|max:255',
-            'comment' => 'string',
+            'title' => 'nullable|string|max:255',
+            'comment' => 'nullable|string',
         ]);
 
         $game = Game::find($request->gameid);
@@ -97,10 +97,25 @@ class ReviewController extends Controller
             'comment' => 'string',
         ]);
 
+        //rating update of game (if review rate changed)
+        if ($request->rating != $review->rating) {
+            $game = Game::find($review->game_id);
+            $unchaned_avgcount = $game->avgcount;
+            $oldrating = $review->rating;
+            $newrating = $request->rating;
+            $prev_avgrating = $game->avgrating;
+    
+            $constcalc_oldrating = (($prev_avgrating * $unchaned_avgcount) - $oldrating) / ( $unchaned_avgcount - 1 ); //remove old rating
+            $game->avgrating = $constcalc_oldrating  + ( ($newrating - $constcalc_oldrating) / ($unchaned_avgcount) ); //add new rating
+
+            $game->save(); //save new changes
+        }
+
         //update data entries
         $review->rating = $request->rating;
         $review->title = $request->title;
         $review->comment = $request->comment;
+        $review->save();
 
         return response()->json([
             'message' => 'Game review updated',
