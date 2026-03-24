@@ -81,41 +81,49 @@ class ReviewController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Review $review)
+    public function show($review_)
     {
+        $review = Review::find($review_);
         return $review ? response()->json($review) : response()->json(null, 404);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Review $review)
+    public function update(Request $request, $review)
     {
         $request->validate([ //validate things to be updates
-            'rating' => 'required|number|max:5|min:1', //Rating range 1 to 5
-            'title' => 'string|max:255',
-            'comment' => 'string',
+            'rating' => 'required|numeric|max:5|min:1', //Rating range 1 to 5
+            'title' => 'nullable|string|max:255',
+            'comment' => 'nullable|string',
         ]);
 
+        $review_ = Review::find($review);
+
         //rating update of game (if review rate changed)
-        if ($request->rating != $review->rating) {
-            $game = Game::find($review->game_id);
+        if ($request->rating != $review_->rating) {
+            $game = Game::find($review_->game_id);
             $unchaned_avgcount = $game->avgcount;
-            $oldrating = $review->rating;
+            $oldrating = $review_->rating;
             $newrating = $request->rating;
             $prev_avgrating = $game->avgrating;
     
-            $constcalc_oldrating = (($prev_avgrating * $unchaned_avgcount) - $oldrating) / ( $unchaned_avgcount - 1 ); //remove old rating
-            $game->avgrating = $constcalc_oldrating  + ( ($newrating - $constcalc_oldrating) / ($unchaned_avgcount) ); //add new rating
+            //to solve zero division problem with one comment present
+            if ($unchaned_avgcount<=1) {
+                $game->avgrating = 0 + ( ($newrating - 0) / ($unchaned_avgcount) ); //replace rating
+            } else {
+                $constcalc_oldrating = (($prev_avgrating * $unchaned_avgcount) - $oldrating) / ( $unchaned_avgcount - 1 ); //remove old rating
+                $game->avgrating = $constcalc_oldrating  + ( ($newrating - $constcalc_oldrating) / ($unchaned_avgcount) ); //add new rating
+            }
 
             $game->save(); //save new changes
         }
 
         //update data entries
-        $review->rating = $request->rating;
-        $review->title = $request->title;
-        $review->comment = $request->comment;
-        $review->save();
+        $review_->rating = $request->rating;
+        $review_->title = $request->title;
+        $review_->comment = $request->comment;
+        $review_->save();
 
         return response()->json([
             'message' => 'Game review updated',
@@ -134,7 +142,13 @@ class ReviewController extends Controller
         $oldavgrating = $game->avgrating; //average rating of game
         $oldavgcount = $game->avgcount; //average rating of game
 
-        $game->avgrating = (($oldavgrating * $oldavgcount) - $deletingrating) / ( $oldavgcount - 1 ); //new average
+        //to solve zero division problem with one comment present
+        if ($oldavgcount<=1) {
+            $game->avgrating = 0;
+        } else {
+            $game->avgrating = (($oldavgrating * $oldavgcount) - $deletingrating) / ( $oldavgcount - 1 ); //new average
+        }
+
         $game->avgcount--; //decrement review count
         $game->save(); //save changes to db
 

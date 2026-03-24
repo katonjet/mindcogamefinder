@@ -1,12 +1,12 @@
 "use client";
 
 import { setGameBackdrop } from "@/app/frontend/Background";
-import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel, H2 } from "@/app/frontend/Common";
+import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel, H2, getStarString } from "@/app/frontend/Common";
 import { Glass } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
 import LoadingPage, { DelayLoad } from "@/app/frontend/LoadingPage";
-import { getGameReviews, getUsersGameReviews, sendNewGameReview } from "@/lib/user";
-import React, { useEffect, useState } from "react";
+import { getGameReviews, getUsersGameReviews, isLoggedIn, sendNewGameReview } from "@/lib/user";
+import React, { JSX, useEffect, useState } from "react";
 import Review from "../Review";
 import { hideHeaderFn } from "@/app/frontend/Header";
 
@@ -68,38 +68,7 @@ function RatingPill({rating}: {rating: string}){
         return <Pill><span className={`${GlyphClass().className} text-xl`}>BBBBB</span></Pill>
     }
 
-    const fullStarCount = parseInt(rating as string),
-          partialStarPercent = Math.floor((tempRating - fullStarCount) * 100);
-
-    const partialStarCharacter = function () {
-        if (partialStarPercent > 0 && partialStarPercent < 50) {return "C";}
-        if (partialStarPercent >= 50 && partialStarPercent < 75) {return "D";}
-        if (partialStarPercent >= 75 && partialStarPercent < 100) {return "E";}
-        return "";
-    };
-
-    const fullStarString = function () {
-        let tempStoreStar = "";
-        for (let index = 0; index < fullStarCount; index++) {
-            tempStoreStar += "F"
-        }
-        return tempStoreStar;
-    }
-
-    const emptyStarString = function () {
-        let tempStoreStar = "";
-
-        const partialStarConsideration = (partialStarPercent > 0) ? 4 : 5;
-
-        for (let index = 0; index < partialStarConsideration - fullStarCount; index++) {
-            tempStoreStar += "B"
-        }
-        return tempStoreStar;
-    }
-
-    const starString: string = `${fullStarString()}${partialStarCharacter()}${emptyStarString()}`;
-
-    return <Pill>{Number(tempRating.toFixed(1))} <span className={`${GlyphClass().className} text-xl`}>{starString}</span></Pill>
+    return <Pill>{Number(tempRating.toFixed(1))} <span className={`${GlyphClass().className} text-xl`}>{getStarString(rating)}</span></Pill>
 
 }
 
@@ -145,22 +114,45 @@ export default function Game({params}: {params: {gameid: string;}}) {
     const [showReviewPopup,setShowReviewPopup] = useState(false);
 
     //for listing existing game reviews
-    const [myReviewList, setMyReviewList] = useState([]);
-    const [reviewListRefresh, setReviewListRefresh] = useState(false); //toggle based trigger
-    
-        useEffect(()=>{
-            const asyncFn = async () => {
-                try {
-                    const data = await getGameReviews(Number(game_id));
-                    setMyReviewList(data)
-                    console.log(myReviewList)
-                } catch (error) {
-                    console.log("Cannot fetch reviews");
-                }
-    
-            };
+    const [myReviewList, setMyReviewList] = useState<JSX.Element[]>([]);
+    //const [myReviewListCount, setMyReviewListCount] = useState(0); //used to distinguish starred reviews and commented reviews
 
-            asyncFn();
+    //Toggles //toggle based trigger
+    const [reviewListRefresh, setReviewListRefresh] = useState(false); 
+
+    //user login status
+    const [loggedIn, setLoggedIN] = useState(false);
+
+
+    //set login state
+    useEffect(()=>{
+        setLoggedIN(isLoggedIn());
+    })
+
+    useEffect(()=>{
+        const asyncFn = async () => {
+            try {
+                const data = await getGameReviews(Number(game_id));
+                const ReactItems: JSX.Element[] = [];
+                setMyReviewList([]) //reset list
+                data.forEach((review: any) => {
+                    if (review.title || review.comment){
+                        ReactItems.push(<Glass key={review.id} className="mb-5 p-10">
+                                            <div className="flex">
+                                                <H2 className="flex-1">{review.title}</H2>
+                                                <H2 className={`${GlyphClass().className}`}>{getStarString(review.rating)}</H2>
+                                            </div>
+                                            <P>{review.comment}</P>
+                                        </Glass>)
+                    }
+                });
+                setMyReviewList(ReactItems)
+            } catch (error) {
+                console.log("Cannot fetch reviews");
+            }
+        };
+
+        asyncFn();
     },[reviewListRefresh]); //refresh list on toggle
 
     useEffect(() => {
@@ -186,8 +178,6 @@ export default function Game({params}: {params: {gameid: string;}}) {
     },[]);
 
     const responseReactPopup = (status_: boolean) => {
-        console.log("POPUP STATUS: ",status_)
-        
         //refresh review list using UseEffect
         if (status_) setReviewListRefresh(!reviewListRefresh);
 
@@ -201,12 +191,18 @@ export default function Game({params}: {params: {gameid: string;}}) {
         setShowReviewPopup(false)
     };
 
+    //Only render review panel add button if logged in
+    const ReviewPanel = (loggedIn) ? (
+        <Glass className="max-h-min p-3 flex justify-center align-middle ml-6 text-7xl rounded-[100px]" onClick={()=>{setShowReviewPopup(true);hideHeaderFn(true);}}>
+            <div className="m-4 leading-10">+</div>
+        </Glass>
+    ) : (null);
+
     //const { gameid } = await params;
     //textShadow: `3px 3px 30px rgba(10,10,10), -3px -3px 30px rgba(10,10,10)`
     const DefaultPage = (<>
         {/* Game reviewing panel */}
         {
-            //(showReviewPopup) ? (<Review gameid={Number(game_id)} effectReturnFn={responseReactPopup} />) : (null)
             (showReviewPopup) ? (<Review gameid={Number(game_id)} effectReturnFn={responseReactPopup} />) : (null)
         }
         <div className="m-14 ml-40 mr-40">
@@ -233,37 +229,30 @@ export default function Game({params}: {params: {gameid: string;}}) {
                 </div>
             </div>
 
-            {/*<FlexContainer>
-                <GamePanel className="flex-1 overflow-hidden">
-                    <H1>Screenshots</H1>
-                    <TestBar2/>
-                </GamePanel>
-            </FlexContainer>*/}
-
             <FlexContainer>
                 <GamePanel className="flex-1">
                     <div className="flex mb-6">
-                        <H1 className="flex-5">Review</H1>
-                        {(showReviewPopup) ? null : (<div>
-                            <Glass className="max-h-min p-3 flex justify-center align-middle rl-7 text-7xl rounded-[100px]" onClick={()=>{setShowReviewPopup(true);hideHeaderFn(true);}}>
-                                <div className="m-4 leading-10">+</div>
-                            </Glass>
-                        </div>)}
+                        <H1 className="">Reviews</H1>
+                        {(showReviewPopup) ? null : ReviewPanel}
                     </div>
 
                     {/* Game reviewing panel (check up) */}
 
                     {/* others reviews (myReviewList) */}
                     <div className="grid">
-
-                        {myReviewList.map((review: any) => {
-                            return (<Glass key={review.id} className="mb-5 p-10">
-                                        <H2>{review.title}</H2>
-                                        <P>{review.comment}</P>
-                                    </Glass>);
-                        })}
+                        {
+                            (myReviewList.length!==0) ? 
+                            myReviewList.map((review: any) => {
+                                return review;
+                            }) : <div><P className="text-center p-3">No comments found</P></div>
+                        }
                     </div>
 
+                </GamePanel>
+
+                <GamePanel className="flex-1 overflow-hidden">
+                    <H1>Screenshots</H1>
+                    <TestBar2/>
                 </GamePanel>
             </FlexContainer>
 

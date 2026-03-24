@@ -152,7 +152,6 @@ export async function logoutUser() {
 
 }
 
-
 export async function sendNewGameReview(gameid: number, rating: number, title?: string, comment?: string){
 
     await checkCsrf();
@@ -162,6 +161,20 @@ export async function sendNewGameReview(gameid: number, rating: number, title?: 
     const dataStream = await api.post('/api/reviews',{
         userid: userData_id,
         gameid: gameid,
+        rating: rating,
+        title: (title) ? title : "",
+        comment: (comment) ? comment : "",
+    });
+
+    return dataStream.data;
+
+}
+
+export async function sendChangedGameReview(reviewid: number, rating: number, title?: string, comment?: string){
+
+    await checkCsrf();
+
+    const dataStream = await api.put(`/api/reviews/${reviewid}`,{
         rating: rating,
         title: (title) ? title : "",
         comment: (comment) ? comment : "",
@@ -190,7 +203,15 @@ export async function getUsersGameReviews() {
     const dataStream = await api.get(`/api/reviews/user/${userData_id}`);
 
     return dataStream.data;
+    
+}
+export async function getSelectUsersGameReviews(reviewid: number) {//Specific review
 
+    await checkCsrf();
+
+    const dataStream = await api.get(`/api/reviews/${reviewid}`);
+
+    return dataStream.data;
     
 }
 

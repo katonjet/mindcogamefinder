@@ -1,33 +1,23 @@
 import { Glass, onClickAmberStyles } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
-import { sendNewGameReview } from "@/lib/user";
-import { useState } from "react";
+import { getSelectUsersGameReviews, sendChangedGameReview, sendNewGameReview } from "@/lib/user";
+import { useEffect, useState } from "react";
 
 export default function ReviewPopup(
     {gameid,
     effectReturnFn,
     reviewid = -1,
-    rating,
-    reviewTitle,
-    reviewComment,}
+}
     :
     {gameid: number;
     effectReturnFn: ((arg: boolean)=>void);
-    reviewid?: number;
-    rating?: number;
-    reviewTitle?: string;
-    reviewComment?: string;}
+    reviewid?: number;}
 ){
 
     //React Hooks and consts
     const [myReviewRating, setMyReviewRating] = useState(0); //zero as null
     const [myReviewTitle, setMyReviewTitle] = useState("");
     const [myReviewComment, setMyReviewComment] = useState("");
-
-    //Post Hook and consts declaration tasks
-    if (rating) setMyReviewRating(rating); //Set rating if user wants to change it
-    if (reviewTitle) setMyReviewTitle(reviewTitle); //Set title if user wants to change it
-    if (reviewComment) setMyReviewComment(reviewComment); //Set comment if user wants to change it
 
     //Star rating Component
     //interactive stars
@@ -67,6 +57,27 @@ export default function ReviewPopup(
         } 
     }
 
+    //Post Hook and consts declaration tasks
+    useEffect(()=>{//only runs in editing mode (review id higher than -1)
+
+        const getSelectReview = async () => {
+            if (reviewid>-1) {
+                const res = await getSelectUsersGameReviews(reviewid)
+                if (res) {
+                    setMyReviewRating(res.rating)
+                    setMyReviewTitle(res.title)
+                    setMyReviewComment(res.comment)
+
+                    starFn(Number(res.rating));
+                    (document.getElementById('title') as HTMLInputElement).value = res.title;
+                    (document.getElementById('comment') as HTMLTextAreaElement).value = res.comment;
+                }
+            }
+        }
+        getSelectReview();
+
+    },[]);
+
     const triggerServerSend = () => {
         if (myReviewRating>=1 && myReviewRating<=5){//rating is required
 
@@ -75,7 +86,7 @@ export default function ReviewPopup(
                 if (reviewid < 0){ //new review
                     sendNewGameReview(gameid, myReviewRating, myReviewTitle, myReviewComment);
                 } else {//update existing review
-                    
+                    sendChangedGameReview(reviewid, myReviewRating, myReviewTitle, myReviewComment)
                 }
                 effectReturnFn(true)
 
