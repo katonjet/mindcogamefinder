@@ -29,11 +29,11 @@ export default function Header(){
 
   return (
     <>
-    <div className={`flex ${(hideHeader) ? 'h-0 min-h-0 m-0 p-0' : 'mt-3'}`}>
-        <div className={`flex-1 text-center font-[1000] text-3xl p-0 m-1`}>
+    <div className={`flex ${(hideHeader) ? 'h-0 min-h-0 m-0 p-0' : 'mt-3 ml-40 mr-40'}`}>
+        <div className={`flex-1 font-[1000] text-3xl p-0 mt-2 mb-2`}>
             <Link href={'/'}>GameFinder</Link>
         </div>
-        <Glass className={`flex-2 ${headerStyles}`}>
+        <Glass className={`flex-3 pl-6 ${headerStyles}`}>
           Search
         </Glass>
         <div className={`flex-1 flex m-1`}>

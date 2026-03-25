@@ -113,7 +113,7 @@ export default function ReviewPopup(
                     <div className="flex flex-col flex-5">
 
                         <div className="flex mt-4 mb-4">
-                            <div className="text-right flex-1">Rating</div>
+                            <div className="text-right flex-2">Rating</div>
                             <div className={`flex-10 ml-5 flex ${GlyphClass().className} text-5xl leading-7`}>
                                     <div id='star1' onMouseEnter={()=>{starHoverControl(1)}} onMouseLeave={()=>{starHoverControl(0)}} onClick={()=>{starFn(1)}}>B</div>
                                     <div id='star2' onMouseEnter={()=>{starHoverControl(2)}} onMouseLeave={()=>{starHoverControl(0)}} onClick={()=>{starFn(2)}}>B</div>
@@ -124,18 +124,18 @@ export default function ReviewPopup(
                         </div>
 
                         <div className="flex mt-4 mb-4">
-                            <div className="text-right flex-1">Title</div>
+                            <div className="text-right flex-2">Title</div>
                             <input onChange={handleTitleChange} className="ml-5 rounded-4xl bg-black/60 flex-10 p-2" type="text" name="" id="title" />
                         </div>
 
                         <div className="flex mt-4 mb-4">
-                            <div className="text-right flex-1">Comment</div>
-                            <textarea onChange={handleCommentChange} className="ml-5 rounded-2xl bg-black/60 flex-10 p-2" name="" id="comment"></textarea>
+                            <div className="text-right flex-2">Comment</div>
+                            <textarea onChange={handleCommentChange} className="ml-5 h-36 rounded-2xl bg-black/60 flex-10 p-2" name="" id="comment"></textarea>
                         </div>
 
                         <div className="flex flex-row mt-4 mb-4">
-                            <div className="flex-1"></div>
-                            <div className="flex-10 ml-5 flex justify-start">
+                            <div className="flex-2"></div>
+                            <div className="flex-11 ml-5 flex justify-start">
                                     <Glass className="p-3 m-1" onClick={()=>{triggerServerSend()}}>Submit</Glass>
                                     <Glass className={`${onClickAmberStyles} p-3 m-1`} onClick={()=>{effectReturnFn(false)}} >Cancel</Glass>
                             </div>

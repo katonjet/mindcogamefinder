@@ -137,7 +137,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
                 setMyReviewList([]) //reset list
                 data.forEach((review: any) => {
                     if (review.title || review.comment){
-                        ReactItems.push(<Glass key={review.id} className="mb-5 p-10">
+                        ReactItems.push(<Glass key={review.id} className="p-10">
                                             <div className="flex">
                                                 <H2 className="flex-1">{review.title}</H2>
                                                 <H2 className={`${GlyphClass().className}`}>{getStarString(review.rating)}</H2>
@@ -206,7 +206,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
             (showReviewPopup) ? (<Review gameid={Number(game_id)} effectReturnFn={responseReactPopup} />) : (null)
         }
         <div className="m-14 ml-40 mr-40">
-            <div className="m-8 min-h-[60vh] flex">
+            <div className="mt-8 mb-8 min-h-[60vh] flex">
                 
                 <div className="flex-3">
                     <div className="max-w-1/2" style={{/*textShadow: `3px 3px 15px rgb(10,10,10), 0 0 15px rgb(10,10,10), 0 0 15px rgb(10,10,10), 0 0 15px rgb(10,10,10)`*/}}>
@@ -239,7 +239,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
                     {/* Game reviewing panel (check up) */}
 
                     {/* others reviews (myReviewList) */}
-                    <div className="grid">
+                    <div className="grid grid-cols-2 gap-5">
                         {
                             (myReviewList.length!==0) ? 
                             myReviewList.map((review: any) => {
@@ -249,8 +249,10 @@ export default function Game({params}: {params: {gameid: string;}}) {
                     </div>
 
                 </GamePanel>
+            </FlexContainer>
 
-                <GamePanel className="flex-1 overflow-hidden">
+            <FlexContainer>
+                <GamePanel className="overflow-hidden">
                     <H1>Screenshots</H1>
                     <TestBar2/>
                 </GamePanel>

@@ -12,8 +12,8 @@ function TestBar () {
   };
 
   const V: React.ReactNode = 
-    <Link href={'/game/1'}>
-      <Glass className="p-3 mr-5 first:ml-8 last:mr-8 text-center min-w-[450px] min-h-[254px] snap-start" style={styleTest}>
+    <Link className="mr-5 first:ml-40 last:mr-40" href={'/game/1'}>
+      <Glass className="p-3 text-center min-w-[450px] min-h-[254px] snap-start" style={styleTest}>
             <h1>Hello</h1>
             <p>This is a demo Test</p>
       </Glass>
@@ -62,10 +62,10 @@ export default function Home() {
   return (
     <>
 
-      <Glass className="m-8 h-100 p-3 text-center">
+      {/*<Glass className="m-8 h-100 p-3 text-center">
         <h1>Hello</h1>
         <p>This is a Carosel Demo</p>
-      </Glass>
+      </Glass>*/}
 
       {TestBar2().map((test: React.ReactNode) => {
           return test;
