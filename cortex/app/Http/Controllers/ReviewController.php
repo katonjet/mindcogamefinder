@@ -22,7 +22,8 @@ class ReviewController extends Controller
     //Get review(s) of a game when loaded (the index function) (login not required)
     public function getReviewFromUser($userid){
         //find game reviews based on user id
-        $gamereview = Review::where('user_id', $userid)->get();
+        //$gamereview = Review::where('user_id', $userid)->get();
+        $gamereview = Review::with('game:id,backdropimagepath')->get();
         return $gamereview ? response()->json($gamereview) : response()->json(null, 404);
     }
 

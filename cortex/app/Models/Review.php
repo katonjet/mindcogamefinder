@@ -23,6 +23,10 @@ class Review extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function game(){
+        return $this->belongsTo(Game::class);
+    }
+
     //get the game that this comment belogs to
     protected function gameId(): Attribute
     {
