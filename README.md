@@ -76,7 +76,7 @@ Lastly, run the Laravel server (Use only this step after setup):
 
 Go into the project folder:
 ```bash
-    cd cortex
+    cd campus
 ```
 
 Then install dependencies using npm:
