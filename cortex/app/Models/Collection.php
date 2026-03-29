@@ -25,4 +25,10 @@ class Collection extends Model
         'games' => '[]', //default to empty JSON array
     ];*/
 
+    public function game(){
+        return $this->belongsTo(User::class);
+    }
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

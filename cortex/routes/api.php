@@ -5,6 +5,7 @@ use App\Http\Controllers\FileUploadTest;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\PlatformController;
+use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Middleware\CorsMe;
 use App\Http\Middleware\SaveMeAuth;
@@ -25,6 +26,14 @@ Route::get('games/byplatform/{p}', [GameController::class, 'getGamesByPlatform']
 Route::get('genres', [GenreController::class, 'index']);
 
 Route::get('platforms', [PlatformController::class, 'index']);
+
+Route::get('recommend/popular', [RecommendationController::class, 'getPopular']);
+Route::get('recommend/random/{user}', [RecommendationController::class, 'getSimilar'])->middleware([SaveMeAuth::class, CorsMe::class]);
+Route::get('recommend/byfavorites/{user}', [RecommendationController::class, 'getFavorite'])->middleware([SaveMeAuth::class, CorsMe::class]);
+Route::get('recommend/fav/{user}/{game}', [RecommendationController::class, 'existsGameFavorite'])->middleware([SaveMeAuth::class, CorsMe::class]);
+Route::post('recommend/fav/{user}/{game}', [RecommendationController::class, 'addGameFavorite'])->middleware([SaveMeAuth::class, CorsMe::class]);
+Route::delete('recommend/fav/{user}/{game}', [RecommendationController::class, 'deleteGameFavorite'])->middleware([SaveMeAuth::class, CorsMe::class]);
+Route::get('recommend/fav/get/getlist/{user}', [RecommendationController::class, 'listGameFavorite'])->middleware([SaveMeAuth::class, CorsMe::class]);
 
 Route::get('reviews/game/{gameid}', [ReviewController::class, 'getReview']);
 Route::middleware([

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { H1, H2, P, FlexContainer, GamePanel, getStarString } from "@/app/frontend/Common";
 import { Glass, onClickAmberStyles } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
-import { deleteGameReview, getUsersGameReviews, isLoggedIn } from "@/lib/user";
+import { deleteGameFavorite, deleteGameReview, getUsersGameReviews, isLoggedIn, listGameFavorite } from "@/lib/user";
 
 
 import Link from "next/link";
@@ -14,6 +14,53 @@ import Review from "@/app/game/Review";
 import { hideHeaderFn } from "@/app/frontend/Header";
 import { setBackColor } from "@/app/frontend/Background";
 import { serverURL } from "@/lib/axios";
+
+function GameCarosel(title: string, items: any[]){
+
+  const itemHolder: React.ReactNode = <>
+    <div className="flex relative mb-14">
+      <div className="flex overflow-x-scroll whitespace-nowrap snap-mandatory mt-6" 
+                style={{
+                  scrollbarWidth: 'none',
+                }}>
+
+            {(items.length>0) ? (items.map((game: any)=>{
+              return  <div key={game.id} className="mr-5" >
+                        <Glass  className="p-0 z-3 flex flex-col-reverse min-w-[450px] min-h-[254px] overflow-hidden relative snap-start bg-cover bg-center" 
+                                style={{boxShadow: 'none' , backgroundImage: `url(${serverURL}${game.backdropimagepath})` }}
+                          >
+                          <Glass className="fixed z-2 min-h-full min-w-full backdrop-blur-none bg-transparent pointer-events-none">
+                          </Glass>
+                          <div className="fixed z-1 p-4 text-2xl min-w-full backdrop-blur-xs min-h-max line-clamp-2 bg-black/40">
+                            <div className="flex">
+                                <div className="flex-1">
+                                    <P>{game.title}</P>
+                                    <P className="font-extrabold text-yellow-500"><span className={GlyphClass().className}>F</span> {Number(game.avgrating).toFixed(1)}</P>
+                                </div>
+                                <div>
+                                    <Glass onClick={()=>{deleteGameFavorite(game.id);window.location.reload();}} className={`z-10 ${onClickAmberStyles}`} ><P className="p-3">Remove</P></Glass>
+                                </div>
+                            </div>
+                            
+                          </div>
+                        </Glass>
+                      </div>
+            })) : (
+              <Glass className="mr-5 flex items-center align-middle justify-items-center text-center min-w-[450px] min-h-[254px] overflow-hidden">
+                  <P className="w-full">No games listed here</P>
+              </Glass>
+            )}
+
+      </div>
+    </div>
+  </>
+
+  return (<>
+    <H1 className=" mb-0">{title}</H1>
+    {itemHolder}
+  </>)
+
+}
 
 export default function Page(){
 
@@ -26,6 +73,7 @@ export default function Page(){
     const userData = JSON.parse(lStore as string);
 
     const [myReviewList, setMyReviewList] = useState([]);
+    const [myFavList, setMyFavList] = useState([]);
 
     //For game review writing
     const [showReviewPopup,setShowReviewPopup] = useState(false);
@@ -43,6 +91,8 @@ export default function Page(){
             DelayLoad(2000)
             try {
                 const data = await getUsersGameReviews();
+                const fav = await listGameFavorite();
+                setMyFavList(fav)
                 setMyReviewList(data)
                 console.log(myReviewList)
             } catch (error) {
@@ -127,6 +177,8 @@ export default function Page(){
                     </Link>
                 </div>
             </div>
+
+            {GameCarosel("My favorites", myFavList)}
 
             {/* Review list */}
             <FlexContainer>

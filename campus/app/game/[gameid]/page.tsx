@@ -5,7 +5,7 @@ import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel, H2, ge
 import { Glass } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
 import LoadingPage, { DelayLoad } from "@/app/frontend/LoadingPage";
-import { getGameReviews, isLoggedIn } from "@/lib/user";
+import { deleteGameFavorite, getGameReviews, isGameFavorite, isLoggedIn, setGameFavorite } from "@/lib/user";
 import React, { JSX, useEffect, useState } from "react";
 import Review from "../Review";
 import { hideHeaderFn } from "@/app/frontend/Header";
@@ -132,15 +132,31 @@ export default function Game({params}: {params: {gameid: string;}}) {
 
     //Toggles //toggle based trigger
     const [reviewListRefresh, setReviewListRefresh] = useState(false); 
+    
+    const [favorite, setFavorite] = useState(false);
 
     //user login status
     const [loggedIn, setLoggedIN] = useState(false);
-
 
     //set login state
     useEffect(()=>{
         setLoggedIN(isLoggedIn());
     })
+
+    useEffect(()=>{
+        const asyncFn = ()=>{
+            if (!loading){//prevent running this when loading game info
+                if (favorite){
+                    //add game to favorite
+                    setGameFavorite(game_id);
+                } else {
+                    //remove game from favorite
+                    deleteGameFavorite(game_id);
+                }
+            }
+        }
+        asyncFn()
+    },[favorite]);
 
     useEffect(()=>{
         const asyncFn = async () => {
@@ -174,6 +190,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
                 setRating(gameData.avgrating);
                 setGenres(genreList.ok ? (await genreList.json()) : []);
                 setPlatforms(platformList.ok ? (await platformList.json()) : []);
+                setFavorite(await isGameFavorite(gameid));
                 
                 await DelayLoad(2000);
                 setGameBackdrop(`${serverURL}${gameData.backdropimagepath}`);
@@ -349,6 +366,15 @@ export default function Game({params}: {params: {gameid: string;}}) {
                                 </Link>
                             })}
                         </PillContainer>
+
+                        {loggedIn ? (
+                            <div className="flex">
+                                <Glass onClick={()=>{setFavorite(!favorite)}} className={`p-4 text-xl mt-3 min-w-min ${favorite ? 'text-yellow-950 bg-yellow-500' : ''}`}>
+                                    {favorite ? 'In your collection' : '+ Add to Favorites'}
+                                </Glass>
+                                <div className="flex-1"></div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             </div>

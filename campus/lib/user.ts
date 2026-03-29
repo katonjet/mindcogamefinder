@@ -30,6 +30,7 @@ export type ReactState_ = {reactFunction: ((arg0: string) => void), dataColumn: 
 const ReactStateCompnentList: ReactState_[] = [];
 export function registerReactComp(stateHolder: ReactState_){
     ReactStateCompnentList.push(stateHolder);
+    setReactState();
 }
 function setReactState(){
 
@@ -56,6 +57,9 @@ function setReactState(){
                 break;
             case 'email':
                 element.reactFunction(JSONData.email)
+                break;
+            case 'id':
+                element.reactFunction(JSONData.id)
                 break;
             default:
                 element.reactFunction('INVALID_COLUMN')
@@ -240,5 +244,50 @@ export async function deleteGameReview(reviewid:number){
     await checkCsrf();
     const dataStream = await api.delete(`/api/reviews/${reviewid}`);
     return dataStream.data;
+
+}
+
+export async function setGameFavorite(gameid: string){
+
+    const user = JSON.parse(localStorage.getItem('userData') as string).id
+
+    await checkCsrf();
+    const dataStream = await api.post(`/api/recommend/fav/${user}/${gameid}`);
+    return dataStream.data;
+
+}
+
+export async function deleteGameFavorite(gameid: string){
+
+    const user = JSON.parse(localStorage.getItem('userData') as string).id
+
+    await checkCsrf();
+    const dataStream = await api.delete(`/api/recommend/fav/${user}/${gameid}`);
+    return dataStream.data;
+
+}
+
+export async function listGameFavorite(){
+
+    const user = JSON.parse(localStorage.getItem('userData') as string).id
+
+    await checkCsrf();
+    const dataStream = await api.get(`/api/recommend/fav/get/getlist/${user}`);
+    return dataStream.data;
+
+}
+
+export async function isGameFavorite(gameid: string){
+
+    const user = JSON.parse(localStorage.getItem('userData') as string).id
+
+    await checkCsrf();
+
+    try {
+        const dataStream = await api.get(`/api/recommend/fav/${user}/${gameid}`);
+        return isSuccess(dataStream.status);
+    } catch (error) {
+        return false
+    }
 
 }
