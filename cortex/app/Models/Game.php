@@ -9,8 +9,6 @@ class Game extends Model
 {
     protected $table = 'games';
 
-    public $timestamps = false;
-
     protected $fillable = [
         //'developer_id',
         'title',
