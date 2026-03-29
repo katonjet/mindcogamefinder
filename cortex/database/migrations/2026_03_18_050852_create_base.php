@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 //COLORS VALIDATED VIA CONTROLLER LIKE THIS -  USED FOR THEMEING PLATFORMS
 /*
@@ -65,12 +64,9 @@ return new class extends Migration
         //Games
         Schema::create('games', function (Blueprint $table) {
             $table->id(); //Primary key
-            //$table->foreignId('developer_id')->nullable(false)->constrained('developers'); //Developer of the game
             $table->string('title', 255)->nullable(false); //Game name
             $table->date('releasedate')->nullable(false); //game release date
             $table->text('desc')->nullable(false); //Description of the game. default should be "No description". to be set by controller
-            $table->json('platforms')->nullable(false); //Supported platforms as JSON array. default none
-            $table->json('genres')->nullable(false); //Genres as JSON array. default none
             $table->text('backdropimagepath'); // URI path to uploaded backdrop image
             //$table->text('posterimagepath'); // URI path to uploaded poster image
             //$table->decimal('avgrating', 3, 1)->default(0.0)->nullable(false); //Auto calculated average rating score from 1 to 5. default zero (0.0[0])
@@ -90,22 +86,42 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        //Collections
-        Schema::create('collections', function (Blueprint $table) {
-            $table->id(); //Primary key
-            $table->foreignId('user_id')->nullable(false)->constrained('users'); //user who is reviewing
-            $table->foreignId('game_id')->nullable(false)->constrained('games'); 
-            $table->string('type', 8)->nullable(false); // collection type [ wishlist | favorite ]
-            $table->primary(['id', 'user_id', 'game_id', 'type']); // A user cannot add the same game more than once
-            $table->foreignId('genre_id')->nullable(false)->constrained('genres');
-            $table->timestamps();
-        });
-
         //Game-Dev Relation
         Schema::create('gamedevrelate', function (Blueprint $table) {
             $table->id();
             $table->foreignId('developer_id')->nullable(false)->constrained('developers');
             $table->foreignId('game_id')->nullable(false)->constrained('games');
+            $table->primary(['id', 'devloper_id', 'game_id']);
+            $table->timestamps();
+        });
+
+        //game-platform(system)
+        Schema::create('gameplatformrelates', function (Blueprint $table){
+            $table->id();
+            $table->foreignId('game_id')->nullable(false)->constrained('games');
+            $table->foreignId('systemplatform_id')->nullable(false)->constrained('systemplatforms');
+            $table->primary(['id', 'game_id', 'systemplatform_id']);
+            $table->timestamps();
+        });
+
+
+        //game-genre
+        Schema::create('gamegenrerelates', function (Blueprint $table){
+            $table->id();
+            $table->foreignId('game_id')->nullable(false)->constrained('games');
+            $table->foreignId('genre_id')->nullable(false)->constrained('genres');
+            $table->primary(['id', 'game_id', 'genre_id']);
+            $table->timestamps();
+        });
+
+        //Collections
+        Schema::create('collections', function (Blueprint $table) {
+            $table->id(); //Primary key
+            $table->foreignId('user_id')->nullable(false)->constrained('users'); //user who is reviewing
+            $table->foreignId('game_id')->nullable(false)->constrained('games'); 
+            $table->primary(['id', 'user_id', 'game_id']); // A user cannot add the same game more than once
+            $table->string('type', 8)->nullable(false); // collection type [ either wishlist or favorite ]
+            $table->foreignId('genre_id')->nullable(false)->constrained('genres'); //for finding users fav genres by using DISTINCT/Unique identifier
             $table->timestamps();
         });
         
@@ -118,6 +134,10 @@ return new class extends Migration
     {
         //Reverse order to up()
         Schema::dropIfExists('collections');
+        Schema::dropIfExists('gamegenrerelate');
+        Schema::dropIfExists('gameplatformrelate');
+        Schema::dropIfExists('gamedevrelate');
+
         Schema::dropIfExists('reviews');
         Schema::dropIfExists('games');
         Schema::dropIfExists('developers');

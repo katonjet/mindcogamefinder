@@ -23,7 +23,7 @@ class ReviewController extends Controller
     public function getReviewFromUser($userid){
         //find game reviews based on user id
         //$gamereview = Review::where('user_id', $userid)->get();
-        $gamereview = Review::with('game:id,backdropimagepath')->get();
+        $gamereview = Review::with('game:id,backdropimagepath')->where('user_id', $userid)->get();
         return $gamereview ? response()->json($gamereview) : response()->json(null, 404);
     }
 
