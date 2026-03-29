@@ -39,31 +39,6 @@ class Game extends Model
         return $this->belongsTo(Developer::class, 'developer_id');
     }*/
 
-    public function getGameName(){
-        return $this->title;
-    }
-
-    public function getReleaseDate(){
-        //be mindful about the data structure here(ie date may return as a string or some php Date object????)
-        return $this->releasedate;
-    }
-
-    public function getDesc(){//Description
-        return $this->desc;
-    }
-
-    public function getPlatforms(){
-        return $this->platforms;
-    }
-
-    public function getGenres(){
-        return $this->genres;
-    }
-
-    public function getBackdropURI(){
-        return $this->backdropimagepath;
-    }
-
     /*public function getPosterURI(){
         return $this->posterimagepath;
     }*/
@@ -83,10 +58,4 @@ class Game extends Model
         );
     }
 
-    //TRIGGERED AUTOMATICALLY AFTER REVIEW ENTRY
-    //(aka WHEN A USER FINISHES WRITING AND SUBMITTING A REVIEW)
-    public function updateGameRating(){
-        //Some average calculation logic. make sure new value is also part of it
-        //Poll average from DB
-    }
 }

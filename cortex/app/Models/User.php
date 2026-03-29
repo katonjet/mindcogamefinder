@@ -22,8 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'profileimagepath', //Added attributes starting from this line
-        'username'
+        'username' //Added attributes starting from this line
     ];
 
     /**

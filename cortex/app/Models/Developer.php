@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Developer extends Model
 {
     protected $table = 'developers';
-    protected $fillable = ['title', 'profileimagepath', 'backdropimagepath'];
+    protected $fillable = ['title', 'profileimagepath', 'username'];
 
     public function getDeveloperName(){
         return $this->title;

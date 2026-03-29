@@ -36,21 +36,20 @@ return new class extends Migration
         Schema::create('systemplatforms', function (Blueprint $table) {
             $table->id(); //Primary Key
             $table->string('title', 50)->nullable(false); //platform name
-            //$table->string('themecolor', 7)->nullable(false); //background COLOR in hex with hash
-            //$table->string('fontcolor', 7)->nullable(false); //text COLOR in hex with hash . check above how it is validated
-            $table->text('svgcontent')->nullable(false); //svg icon file in base 64 format (image/svg+xml)
+            $table->string('themecolor', 7)->nullable(false); //background COLOR in hex with hash
+            $table->timestamps();
         });
 
         //Game Genre. ie. Scifi, RPG, ETC...
         Schema::create('genres', function (Blueprint $table) {
             $table->id(); //Primary Key
             $table->string('title', 50)->nullable(false); //genre name
-            $table->text('svgcontent')->nullable(false); //svg icon file in base 64 format (image/svg+xml)
+            $table->string('themecolor', 7)->default('#787878')->nullable(false); //background COLOR in hex with hash
+            $table->timestamps();
         });
 
         //Users - update existing user schema
         Schema::table('users', function (Blueprint $table) {
-            $table->text('profileimagepath')->nullable(true); // URI path to uploaded profile picture
             $table->string('username', 50)->unique()->nullable(false); //max 50 char username that is unique
         });
 
@@ -58,8 +57,9 @@ return new class extends Migration
         Schema::create('developers', function (Blueprint $table) {
             $table->id(); // Primary key
             $table->string('title', 50)->nullable(false); // developer name
-            $table->text('profileimagepath'); // URI path to uploaded profile picture
-            $table->text('backdropimagepath'); // URI path to uploaded backdrop image
+            $table->text('profileimagepath')->nullable(true); // URI path to uploaded profile image
+            $table->string('username', 50)->unique()->nullable(false);
+            $table->timestamps();
         });
 
         //Games
@@ -76,6 +76,7 @@ return new class extends Migration
             //$table->decimal('avgrating', 3, 1)->default(0.0)->nullable(false); //Auto calculated average rating score from 1 to 5. default zero (0.0[0])
             $table->decimal('avgrating')->default(0.0)->nullable(false); //Auto calculated average rating score from 1 to 5. default zero (0.0[0])
             $table->decimal('avgcount')->default(0.0)->nullable(false); //total review count for efficient average calculation
+            $table->timestamps();
         });
 
         //Reviews
@@ -86,14 +87,26 @@ return new class extends Migration
             $table->decimal('rating', 3, 1)->nullable(false); //Rating. used to calculate new game average (Range - 0 to 5)
             $table->text('title')->nullable(true); //Optional Title of the comment
             $table->text('comment')->nullable(true); //Optional User Comment/opinion
+            $table->timestamps();
         });
 
         //Collections
         Schema::create('collections', function (Blueprint $table) {
             $table->id(); //Primary key
             $table->foreignId('user_id')->nullable(false)->constrained('users'); //user who is reviewing
-            $table->string('title', 255)->nullable(false); // Name of the collection
-            $table->json('games')->nullable(false); //List of games as JSON array. default none
+            $table->foreignId('game_id')->nullable(false)->constrained('games'); 
+            $table->string('type', 8)->nullable(false); // collection type [ wishlist | favorite ]
+            $table->primary(['id', 'user_id', 'game_id', 'type']); // A user cannot add the same game more than once
+            $table->foreignId('genre_id')->nullable(false)->constrained('genres');
+            $table->timestamps();
+        });
+
+        //Game-Dev Relation
+        Schema::create('gamedevrelate', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('developer_id')->nullable(false)->constrained('developers');
+            $table->foreignId('game_id')->nullable(false)->constrained('games');
+            $table->timestamps();
         });
         
     }
@@ -110,7 +123,6 @@ return new class extends Migration
         Schema::dropIfExists('developers');
 
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('profileimagepath');
             $table->dropColumn('username');
         });
 
