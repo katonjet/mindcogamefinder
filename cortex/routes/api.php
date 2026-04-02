@@ -6,13 +6,15 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Middleware\CorsMe;
 use App\Http\Middleware\SaveMeAuth;
+use App\Http\Middleware\BuildGameLibrary;
 
 //file upload test
 Route::post('uploadtest', [FileUploadTest::class, 'upload']);
 
 Route::post('uploadgamebackdrop', [FileUploadTest::class, 'uploadGameBackdrop']);
 
-Route::apiResource('games', GameController::class);
+Route::apiResource('games', GameController::class)->middleware(BuildGameLibrary::class);
+Route::get('games/genres/{game}', [GameController::class, 'getGenres']);
 
 Route::get('reviews/game/{gameid}', [ReviewController::class, 'getReview']);
 Route::middleware([

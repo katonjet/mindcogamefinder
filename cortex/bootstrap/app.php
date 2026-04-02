@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
         $middleware->append(\App\Http\Middleware\SaveMeAuth::class);
         $middleware->append(\App\Http\Middleware\CorsMe::class); //Fix for chrome / chromium based browser
+        $middleware->append(\App\Http\Middleware\BuildGameLibrary::class); //RAWG API
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

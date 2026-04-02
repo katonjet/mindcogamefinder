@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    //RAWG API KEY
+    'rawgKey' => env('RAWG_KEY'),
+
 ];
