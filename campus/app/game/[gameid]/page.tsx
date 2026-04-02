@@ -12,6 +12,7 @@ import { hideHeaderFn } from "@/app/frontend/Header";
 import ReviewViewPanel from "@/app/game/ReviewViewPanel";
 import ScreenshotViewPanel from "@/app/game/ScreenshotViewPanel";
 import { serverURL } from "@/lib/axios";
+import Link from "next/link";
 
 //allow for setting css variables
 declare module 'react' {
@@ -119,6 +120,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
     const [rating, setRating] = useState("0");
     const [game_id, setGameId] = useState("1");
     const [genres, setGenres] = useState([]);
+    const [platforms, setPlatforms] = useState([]);
 
     //For game review writing
     const [showReviewPopup,setShowReviewPopup] = useState(false);
@@ -142,8 +144,10 @@ export default function Game({params}: {params: {gameid: string;}}) {
 
     useEffect(()=>{
         const asyncFn = async () => {
+            const { gameid } = await params;
+            setGameId(gameid)
             try {
-                const data = await getGameReviews(Number(game_id));
+                const data = await getGameReviews(Number(gameid));
                 setMyReviewList([]) //reset list
                 setMyReviewList(data)
             } catch (error) {
@@ -158,16 +162,18 @@ export default function Game({params}: {params: {gameid: string;}}) {
 
         const asyncFunc = async () => {
             const { gameid } = await params;
-            setGameId(gameid.toString());
+            //setGameId(gameid);
             const gameData = await getGame(gameid);
             if (gameData) {
 
-                const genres = await fetch(`${serverURL}/api/games/genres/${gameid}`);
+                const genreList = await fetch(`${serverURL}/api/games/genres/${gameid}`);
+                const platformList = await fetch(`${serverURL}/api/games/platforms/${gameid}`);
 
                 setTitle(gameData.title);
                 setDesc(gameData.desc);
                 setRating(gameData.avgrating);
-                setGenres(genres.ok ? (await genres.json()) : []);
+                setGenres(genreList.ok ? (await genreList.json()) : []);
+                setPlatforms(platformList.ok ? (await platformList.json()) : []);
                 
                 await DelayLoad(2000);
                 setGameBackdrop(`${serverURL}${gameData.backdropimagepath}`);
@@ -323,8 +329,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
                         <H1 style={{textShadow: `0px 0px 50px rgba(0,0,0,1), 0px 0px 50px rgba(0,0,0,1), 0px 0px 25px rgba(0,0,0,1)`}}>{title}</H1>
 
                         <BlurShadow className="text-left mb-6">
-                            {/*<P className="font-extrabold whitespace-pre-line">{desc}</P>*/}
-                            {<p className="font-extrabold whitespace-pre-line">{desc}</p>}
+                            <div className="font-extrabold" dangerouslySetInnerHTML={{__html: desc}} />
                         </BlurShadow>
 
                         <PillContainer>
@@ -332,7 +337,16 @@ export default function Game({params}: {params: {gameid: string;}}) {
                         </PillContainer>
                         <PillContainer>
                             {genres.map((genre: any) => {
-                                return <Pill onClick={()=>{}} style={{ '--dynamic-color': genre.themecolor }} className="hover:bg-(--dynamic-color)" key={genre.id}>{genre.title}</Pill>;
+                                return <Link key={genre.id} className="m-1 p-0 first:ml-0 last:mr-0" href={`/game/bygenre/${genre.id}`}>
+                                    <Pill colorHex={genre.themecolor} onClick={()=>{}} style={{ '--dynamic-color': genre.themecolor }} className="hover:bg-(--dynamic-color) m-0 p-0" >{genre.title}</Pill>
+                                </Link>
+                            })}
+                        </PillContainer>
+                        <PillContainer>
+                            {platforms.map((platform: any) => {
+                                return <Link key={platform.id} className="m-1 p-0 first:ml-0 last:mr-0" href={`/game/byplatform/${platform.id}`}>
+                                    <Pill colorHex={platform.themecolor} onClick={()=>{}} style={{ '--dynamic-color': platform.themecolor }} className="hover:bg-(--dynamic-color) m-0 p-0" >{platform.title}</Pill>
+                                </Link>
                             })}
                         </PillContainer>
                     </div>
@@ -358,7 +372,7 @@ export default function Game({params}: {params: {gameid: string;}}) {
                 <GamePanel className="flex-1 overflow-hidden">
                     <H1>Screenshots</H1>
                     {/*<TestBar2/>*/}
-                    {setScreenshotsUI(5)}
+                    {setScreenshotsUI(Math.floor(Math.random() * 15) + 4)}
                 </GamePanel>
 
             </FlexContainer>

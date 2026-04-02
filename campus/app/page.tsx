@@ -43,9 +43,83 @@ function GameCarosel(title: string, items: any[]){
 
 }
 
+function GenreCarosel(items: any[]){
+
+  const itemHolder: React.ReactNode = <>
+    <div className="flex relative mb-14">
+      <div className="flex overflow-x-scroll whitespace-nowrap snap-mandatory mt-6" 
+                style={{
+                  scrollbarWidth: 'none',
+                }}>
+
+            {items.map((genre: any)=>{
+              return  <Link key={genre.id} className="mr-5 first:ml-40 last:mr-40" href={`/game/bygenre/${genre.id}`}>
+                        <Glass  className="p-0 z-3 flex flex-col-reverse min-w-[450px] min-h-[254px] overflow-hidden relative snap-start bg-cover bg-center" 
+                                style={{boxShadow: 'none', backgroundColor: genre.themecolor }}
+                          >
+                          <Glass className="fixed z-2 min-h-full min-w-full backdrop-blur-none bg-transparent cursor-pointer">
+                          </Glass>
+                          <div className="fixed z-1 p-4 text-2xl min-w-full backdrop-blur-xs bg-linear-0 from-black/60 to-transparent">
+                            <div className="m-30"></div>
+                            <div className="text-4xl ml-3">{genre.title}</div>
+                            <div className="m-6"></div>
+                          </div>
+                        </Glass>
+                      </Link>
+            })}
+
+      </div>
+    </div>
+  </>
+
+  return <>
+    <H1 className="ml-40 mb-0">Browse by genres</H1>
+    {itemHolder}
+  </>
+
+}
+
+function PlatformCarosel(items: any[]){
+
+  const itemHolder: React.ReactNode = <>
+    <div className="flex relative mb-14">
+      <div className="flex overflow-x-scroll whitespace-nowrap snap-mandatory mt-6" 
+                style={{
+                  scrollbarWidth: 'none',
+                }}>
+
+            {items.map((genre: any)=>{
+              return  <Link key={genre.id} className="mr-5 first:ml-40 last:mr-40" href={`/game/byplatform/${genre.id}`}>
+                        <Glass  className="p-0 z-3 flex flex-col-reverse min-w-[450px] min-h-[254px] overflow-hidden relative snap-start bg-cover bg-center" 
+                                style={{boxShadow: 'none', backgroundColor: genre.themecolor }}
+                          >
+                          <Glass className="fixed z-2 min-h-full min-w-full backdrop-blur-none bg-transparent cursor-pointer">
+                          </Glass>
+                          <div className="fixed z-1 p-4 text-2xl min-w-full backdrop-blur-xs bg-linear-0 from-black/60 to-transparent">
+                            <div className="m-30"></div>
+                            <div className="text-4xl ml-3">{genre.title}</div>
+                            <div className="m-6"></div>
+                          </div>
+                        </Glass>
+                      </Link>
+            })}
+
+      </div>
+    </div>
+  </>
+
+  return <>
+    <H1 className="ml-40 mb-0">Browse by platforms</H1>
+    {itemHolder}
+  </>
+
+}
+
 export default function Home() {
 
   const [todaysList, setTodaysList] = useState([]);
+  const [genreList, setGenreList] = useState([]);
+  const [platformList, setPlatformList] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -53,15 +127,27 @@ export default function Home() {
 
     const asyncFn = async ()=>{
       
-      const data = await fetch(`${serverURL}/api/games`);
-
-      if (data.ok) {
-
-        setTodaysList(await data.json())
-
+      const games = await fetch(`${serverURL}/api/games`);
+      if (games.ok) {
+        setTodaysList(await games.json())
       } else {
         setTodaysList([])
       }
+
+      const genres = await fetch(`${serverURL}/api/genres`)
+      if (genres.ok){
+        setGenreList(await genres.json())
+      } else {
+        setGenreList([])
+      }
+
+      const platforms = await fetch(`${serverURL}/api/platforms`)
+      if (platforms.ok){
+        setPlatformList(await platforms.json())
+      } else {
+        setPlatformList([])
+      }
+
       await DelayLoad(2000);
       setLoading(false)
 
@@ -80,6 +166,8 @@ export default function Home() {
         <div className="mt-20"></div>
 
         {GameCarosel(`What's new`, todaysList)}
+        {GenreCarosel(genreList)}
+        {PlatformCarosel(platformList)}
 
         <div className="mt-20"></div>
 

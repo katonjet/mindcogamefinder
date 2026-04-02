@@ -1,11 +1,11 @@
-import { H1 } from "@/app/frontend/Common";
+
 import { Glass, onClickAmberStyles } from "@/app/frontend/Glass";
 import React from "react";
 
-function TestBar () {
+function TestBar (count: number) {
 
   const styleTest: React.CSSProperties = {
-    backgroundImage: `url('/sunday.png')`,
+    backgroundImage: `url('/tuesday.png')`,
     backgroundSize: 'cover',
   };
 
@@ -16,7 +16,7 @@ function TestBar () {
 
   var output: React.ReactNode[] = [];
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < count; i++) {
     var E = React.cloneElement(V, {key: i.toString()});
     output.push(E)  
   }
@@ -25,7 +25,7 @@ function TestBar () {
 
 }
 
-function TestBar2(){
+function TestBar2(count?: number){
 
   const V: React.ReactNode = <>
     <div className="flex relative">
@@ -33,7 +33,7 @@ function TestBar2(){
                 style={{
                   scrollbarWidth: 'none',
                 }}>
-            {TestBar().map((test: React.ReactNode) => {
+            {TestBar(count ? count : 6).map((test: React.ReactNode) => {
               return test;
             })}
       </div>
