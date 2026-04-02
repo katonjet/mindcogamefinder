@@ -68,6 +68,12 @@ export default function Register() {
 
   }
 
+  const enterKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        triggerSignUp()
+      }
+  }
+
   return (
     <div className="grid items-center justify-center min-h-full min-w-full fixed">
 
@@ -83,27 +89,27 @@ export default function Register() {
 
                         <div className="mt-4 mb-2">
                             <div className=" ml-1 mb-1">Name</div>
-                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" type="text" name="" onChange={handleName} />
+                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" onKeyDown={enterKeyDown} type="text" name="" onChange={handleName} />
                         </div>
 
                         <div className="mt-4 mb-2">
                             <div className=" ml-1 mb-1">Username</div>
-                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" type="text" name="" onChange={handleUsername} />
+                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" onKeyDown={enterKeyDown} type="text" name="" onChange={handleUsername} />
                         </div>
 
                         <div className="mt-4 mb-2">
                             <div className=" ml-1 mb-1">Email</div>
-                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" type="text" name="" onChange={handleEmail} />
+                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" onKeyDown={enterKeyDown} type="text" name="" onChange={handleEmail} />
                         </div>
 
                         <div className="mt-4 mb-2">
                             <div className=" ml-1 mb-1">Password</div>
-                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" type="password" name="" onChange={handlePwd1} />
+                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" onKeyDown={enterKeyDown} type="password" name="" onChange={handlePwd1} />
                         </div>
 
                         <div className="mt-4 mb-2">
                             <div className=" ml-1 mb-1">Confirm password</div>
-                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" type="password" name="" onChange={handlePwd2} />
+                            <input  className="rounded-4xl bg-black/60 p-2 min-w-full" onKeyDown={enterKeyDown} type="password" name="" onChange={handlePwd2} />
                         </div>
                         {(errorPop) ? (<Glass className="bg-red-500/70 text-red-200 p-5">
                             {errorMsg}

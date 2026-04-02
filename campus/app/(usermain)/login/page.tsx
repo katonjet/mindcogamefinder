@@ -6,20 +6,7 @@ import { GlyphClass } from "@/app/frontend/Glyphs";
 import { isLoggedIn, loginUser } from "@/lib/user";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-async function perfromFunnyLogin(){
-  const wee = await loginUser('applepie@example.com', 'password134')
-  console.log(`WEST: ${wee}`)
-}
-
-export function LoginPage() {
-  return (
-    <div>
-        <div onClick={()=>{perfromFunnyLogin()}}>TEST LOGIN</div>
-    </div>
-  );
-}
+import React, { useEffect, useState } from "react";
 
 export default function Login() {
 
@@ -71,6 +58,12 @@ export default function Login() {
     setLoginButtonDisable(false)
   }
 
+  const enterKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      triggerLogin()
+    }
+  }
+
   return (
     <div className="grid items-center justify-center min-h-full min-w-full fixed">
     
@@ -86,12 +79,12 @@ export default function Login() {
     
                             <div className="mt-4 mb-2">
                                 <div className=" ml-1 mb-1">Email</div>
-                                <input  className="rounded-4xl bg-black/60 p-2 min-w-full" type="text" name="" onChange={handleEmail} />
+                                <input  className="rounded-4xl bg-black/60 p-2 min-w-full" onKeyDown={enterKeyDown} type="text" name="" onChange={handleEmail} />
                             </div>
     
                             <div className="mt-4 mb-2">
                                 <div className=" ml-1 mb-1">Password</div>
-                                <input  className="rounded-4xl bg-black/60 p-2 min-w-full" type="password" name="" onChange={handlePwd} />
+                                <input  className="rounded-4xl bg-black/60 p-2 min-w-full" onKeyDown={enterKeyDown} type="password" name="" onChange={handlePwd} />
                             </div>
     
                             {(errorPop) ? (<Glass className="bg-red-500/70 text-red-200 p-5">
