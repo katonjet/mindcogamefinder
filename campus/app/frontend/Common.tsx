@@ -24,8 +24,45 @@ export function GamePanel({className, style, children}: divCommon) {
     </Glass>;
 }
 
-export function Pill({children, style, className, onClick}: divCommon){
-    return <Glass onClick={onClick} className={`p-3 m-1 first:ml-0 last:mr-0 ${className}`} style={style}>{children}</Glass>;
+const hexToRGB = (hex: string): number[] => {
+  // Remove leading '#' if present
+  hex = hex.startsWith("#") ? hex.slice(1) : hex;
+
+  // Expand 3-digit shorthand (e.g., "27a" -> "2277aa")
+  if (hex.length === 3) {
+    hex = hex.split("").reduce((str, x) => str + x + x, "");
+  }
+
+  // Split string into chunks of 2 and convert to integers
+  const values = hex
+    .split(/([a-f0-9]{2})/i)
+    .filter(Boolean)
+    .map((x) => parseInt(x, 16));
+
+  // Return formatted string with 'a' if alpha is detected
+  //return `rgb${values.length === 4 ? "a" : ""}(${values.join(", ")})`;
+
+  return values;
+};
+
+export function Pill({children, style, className, onClick, colorHex}: divCommon & {colorHex?: string}){
+
+    //ARRAY => 0-Red,  1-Green,  2-Blue
+    const rgbVals = hexToRGB(colorHex || '#000000');
+
+    //Formula 1
+    for (let i = 0; i < rgbVals.length; i++) {
+        rgbVals[i] = ((rgbVals[i] + 0.055) / 1.055)^2.4;
+    }
+
+    //Formula 2 - luminance
+    const luminance_bg = (rgbVals[0] * 0.2126) + (rgbVals[1] * 0.7152) + (rgbVals[2] * 0.0722)
+    const luminance_white_text = (255 * 0.2126) + (255 * 0.7152) + (255 * 0.0722)
+    
+    //Formula 3 - contrast ratio
+    const contrastRatio = luminance_white_text / luminance_bg;
+
+    return <Glass onClick={onClick} className={`${(contrastRatio<2) ? 'hover:text-black' : ''} p-3 m-1 first:ml-0 last:mr-0 ${className} whitespace-nowrap`} style={style}>{children}</Glass>;
 }
 
 export function PillContainer({children, style, className}: divCommon){
