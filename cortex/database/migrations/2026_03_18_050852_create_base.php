@@ -34,15 +34,15 @@ return new class extends Migration
         //Playable platforms. ie. Steam Deck, iOS, Android, etc...
         Schema::create('systemplatforms', function (Blueprint $table) {
             $table->id(); //Primary Key
-            $table->string('title', 50)->nullable(false); //platform name
-            $table->string('themecolor', 7)->nullable(false); //background COLOR in hex with hash
+            $table->string('title', 50)->unique()->nullable(false); //platform name
+            $table->string('themecolor', 7)->default('#787878')->nullable(false); //background COLOR in hex with hash
             $table->timestamps();
         });
 
         //Game Genre. ie. Scifi, RPG, ETC...
         Schema::create('genres', function (Blueprint $table) {
             $table->id(); //Primary Key
-            $table->string('title', 50)->nullable(false); //genre name
+            $table->string('title', 50)->unique()->nullable(false); //genre name
             $table->string('themecolor', 7)->default('#787878')->nullable(false); //background COLOR in hex with hash
             $table->timestamps();
         });
@@ -53,18 +53,18 @@ return new class extends Migration
         });
 
         //Game developers
-        Schema::create('developers', function (Blueprint $table) {
+        /*Schema::create('developers', function (Blueprint $table) {
             $table->id(); // Primary key
-            $table->string('title', 50)->nullable(false); // developer name
+            $table->string('title', 50)->unique()->nullable(false); // developer name
             $table->text('profileimagepath')->nullable(true); // URI path to uploaded profile image
             $table->string('username', 50)->unique()->nullable(false);
             $table->timestamps();
-        });
+        });*/
 
         //Games
         Schema::create('games', function (Blueprint $table) {
             $table->id(); //Primary key
-            $table->string('title', 255)->nullable(false); //Game name
+            $table->string('title', 255)->unique()->nullable(false); //Game name
             $table->date('releasedate')->nullable(false); //game release date
             $table->text('desc')->nullable(false); //Description of the game. default should be "No description". to be set by controller
             $table->text('backdropimagepath'); // URI path to uploaded backdrop image
@@ -87,13 +87,13 @@ return new class extends Migration
         });
 
         //Game-Dev Relation
-        Schema::create('gamedevrelate', function (Blueprint $table) {
+        /*Schema::create('gamedevrelates', function (Blueprint $table) {
             $table->id();
             $table->foreignId('developer_id')->nullable(false)->constrained('developers');
             $table->foreignId('game_id')->nullable(false)->constrained('games');
-            $table->primary(['id', 'devloper_id', 'game_id']);
+            $table->primary(['id', 'developer_id', 'game_id']);
             $table->timestamps();
-        });
+        });*/
 
         //game-platform(system)
         Schema::create('gameplatformrelates', function (Blueprint $table){
@@ -134,13 +134,13 @@ return new class extends Migration
     {
         //Reverse order to up()
         Schema::dropIfExists('collections');
-        Schema::dropIfExists('gamegenrerelate');
-        Schema::dropIfExists('gameplatformrelate');
-        Schema::dropIfExists('gamedevrelate');
+        Schema::dropIfExists('gamegenrerelates');
+        Schema::dropIfExists('gameplatformrelates');
+        //Schema::dropIfExists('gamedevrelates');
 
         Schema::dropIfExists('reviews');
         Schema::dropIfExists('games');
-        Schema::dropIfExists('developers');
+        //Schema::dropIfExists('developers');
 
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('username');

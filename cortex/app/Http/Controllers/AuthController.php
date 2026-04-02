@@ -36,7 +36,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'User has been registered',
             //'token' => $token,//INTELLISENSE NOT READING THIS
-            'user' => $user
+            //'user' => $user
         ], 201)->cookie('userAuth',"$token");
 
     }

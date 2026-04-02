@@ -10,36 +10,13 @@ class Game extends Model
     protected $table = 'games';
 
     protected $fillable = [
-        //'developer_id',
         'title',
         'releasedate',
         'desc',
-        'platforms',
-        'genres',
         'backdropimagepath',
-        //'posterimagepath',
         'avgrating',
         'avgcount',
         ];
-
-    protected $casts = [
-        'platfroms' => 'array',
-        'genres' => 'array', //json auto encode/decode
-    ];
-
-    protected $attributes = [
-        'platforms' => '[]',
-        'genres' => '[]'//default to empty JSON array
-    ];
-
-    //get creator/developer of this game
-    /*public function getDeveloper(){
-        return $this->belongsTo(Developer::class, 'developer_id');
-    }*/
-
-    /*public function getPosterURI(){
-        return $this->posterimagepath;
-    }*/
 
     protected function avgrating(): Attribute
     {
