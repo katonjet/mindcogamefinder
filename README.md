@@ -63,7 +63,7 @@ Next, setup the configs:
     php artisan config:cache
 ```
 
-Next, write [Laravel environment file](#laravel-environment-file) to ```.env``` file. You will also need to **ENTER THE PROVIDED API KEY FROM RAWG.IO** to the same ```.env``` file as this will download game data.
+Next, write [Laravel environment file](#laravel-environment-file) to ```.env``` file. You will also need to **ADD THE PROVIDED API KEY FROM RAWG.IO** to the same ```.env``` file to be able to download game data.
 
 Lastly, run the Laravel server (Use only this step after setup):
 ```bash
