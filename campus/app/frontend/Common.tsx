@@ -10,8 +10,8 @@ export function H2({children, style, className}: divCommon){
     return <div className={`text-4xl mb-4 font-bold ${className}`} style={style}>{children}</div>
 }
 
-export function P({children, style, className}: divCommon){
-    return <div style={style} className={`text-lg ${className}`}>{children}</div>
+export function P({children, style, className, onClick}: divCommon){
+    return <div onClick={onClick} style={style} className={`text-lg ${className}`}>{children}</div>
 }
 
 export function FlexContainer({children}: divCommon){
@@ -24,8 +24,8 @@ export function GamePanel({className, style, children}: divCommon) {
     </Glass>;
 }
 
-export function Pill({children, style, className}: divCommon){
-    return <Glass className={`p-3 m-1 first:ml-0 last:mr-0 ${className}`} style={style}>{children}</Glass>;
+export function Pill({children, style, className, onClick}: divCommon){
+    return <Glass onClick={onClick} className={`p-3 m-1 first:ml-0 last:mr-0 ${className}`} style={style}>{children}</Glass>;
 }
 
 export function PillContainer({children, style, className}: divCommon){

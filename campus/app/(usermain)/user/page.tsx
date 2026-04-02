@@ -1,6 +1,6 @@
 "use client";
 
-import React, { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { H1, H2, P, FlexContainer, GamePanel, getStarString } from "@/app/frontend/Common";
 import { Glass, onClickAmberStyles } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import Review from "@/app/game/Review";
 import { hideHeaderFn } from "@/app/frontend/Header";
 import { setBackColor } from "@/app/frontend/Background";
+import { serverURL } from "@/lib/axios";
 
 export default function Page(){
 
@@ -63,7 +64,7 @@ export default function Page(){
 
             await DelayLoad(2000);
             setLoading(false);
-            setBackColor('#ffff00') //testing colors
+            setBackColor('#e67d19') //testing colors
         }
         loginCheck();
     });
@@ -135,17 +136,19 @@ export default function Page(){
                             {
                                 (myReviewList.length===0 || !myReviewList) ? (<div><P className="text-center p-3">No comments found</P></div>) : (
                                     myReviewList.map((review: any)=>{
-                                    return (<Glass key={review.id} style={{backgroundImage: `url(http://localhost:8000${review.game.backdropimagepath})`}} className="p-10 bg-cover bg-center">
+                                    return (<Glass key={review.id} style={{backgroundImage: `url(${serverURL}${review.game.backdropimagepath})`}} className="p-10 bg-cover bg-center text-shadow-none">
                                             <Glass className="m-0 p-0 backdrop-blur-none border-none absolute bg-contain inset-0 -z-10 bg-black/40 overflow-hidden"></Glass>
-                                            <div className="relative z-10 ">
+                                            <div className="relative z-10">
                                                 <div className="flex ml-1">
-                                                    <H2 className="flex-1">{(!review.title || review.title==="") ? "Rating" : review.title}</H2>
+                                                    <H2 className="flex-1">{(!review.title || review.title==="") ? "Rating only" : review.title}</H2>
                                                     <H2 className={`${GlyphClass().className}`}>{getStarString(review.rating)}</H2>
                                                 </div>
-                                                <P className="ml-1">{review.comment}</P>
+
+                                                <P className="ml-1 min-h-15 line-clamp-2">{review.comment}</P>
+
                                                 <div className="flex flex-row mt-3">
                                                     <Link href={`/game/${review.game_id}`} className="mr-3">
-                                                        <Glass onClick={()=>{}} className={`p-3 max-w-min m-0 text-shadow-none`}>
+                                                        <Glass onClick={()=>{}} className={`p-3 max-w-min m-0`}>
                                                             <span className="whitespace-nowrap">View game</span>
                                                         </Glass>
                                                     </Link>    
@@ -154,7 +157,7 @@ export default function Page(){
                                                             review.id,
                                                             review.game_id
                                                         )
-                                                    }} className={`p-3 max-w-min m-0 mr-3 text-shadow-none`}>
+                                                    }} className={`p-3 max-w-min m-0 mr-3`}>
                                                         <span className="whitespace-nowrap">Edit</span>
                                                     </Glass>
                                                     <Glass onClick={()=>{toggleRefresh(deleteGameReview, review.id)}} className={`p-3 max-w-min m-0 mr-3 ${onClickAmberStyles} text-shadow-none`}>

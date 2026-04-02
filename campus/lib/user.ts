@@ -71,15 +71,22 @@ export async function loginUser(email: string, passwd: string){
 
     await delay(2000);//To give server time to process Csrf before login flow
 
-    const dataStream = await api.post('/login', {
-        email: email,
-        password: passwd
-    });
+    try {
+        const dataStream = await api.post('/login', {
+            email: email,
+            password: passwd
+        });
 
-    if (isSuccess(dataStream.status)) getUser();
+        if (isSuccess(dataStream.status)) {getUser()}
+        else {console.error(dataStream.statusText); return null;}
+        
+        return dataStream.data;
 
-    return await dataStream.data;
-
+    } catch (error) {
+        const errorMsg = (error instanceof Error)? (`${error.name}: ${error.message}`) : String(error) 
+        console.error(errorMsg)
+        return null
+    }
 }
 
 export async function sanityTest(): Promise<string> {
@@ -125,15 +132,28 @@ export async function registerUser(name: string, email: string, username: string
 
     await checkCsrf()
 
-    const dataStream = await api.post('/register', {
-        name: name,
-        email: email,
-        username: username,
-        password: pwd1,
-        password_confirmation: pwd2
-    });
+    try {
+        const dataStream = await api.post('/register', {
+            name: name,
+            email: email,
+            username: username,
+            password: pwd1,
+            password_confirmation: pwd2
+        });
 
-    return dataStream.data;
+        if (isSuccess(dataStream.status)){
+            return dataStream.data;
+        } else {
+            console.error(dataStream.statusText)
+            return null
+        }
+
+        
+    } catch (error) {
+        const errorMsg = (error instanceof Error)? (`${error.name}: ${error.message}`) : String(error) 
+        console.error(errorMsg)
+        return null
+    }
 
 }
 

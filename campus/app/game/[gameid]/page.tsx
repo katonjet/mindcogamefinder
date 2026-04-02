@@ -5,10 +5,20 @@ import { H1, P, divCommon, FlexContainer, Pill, PillContainer, GamePanel, H2, ge
 import { Glass } from "@/app/frontend/Glass";
 import { GlyphClass } from "@/app/frontend/Glyphs";
 import LoadingPage, { DelayLoad } from "@/app/frontend/LoadingPage";
-import { getGameReviews, getUsersGameReviews, isLoggedIn, sendNewGameReview } from "@/lib/user";
+import { getGameReviews, isLoggedIn } from "@/lib/user";
 import React, { JSX, useEffect, useState } from "react";
 import Review from "../Review";
 import { hideHeaderFn } from "@/app/frontend/Header";
+import ReviewViewPanel from "@/app/game/ReviewViewPanel";
+import ScreenshotViewPanel from "@/app/game/ScreenshotViewPanel";
+import { serverURL } from "@/lib/axios";
+
+//allow for setting css variables
+declare module 'react' {
+  interface CSSProperties {
+    [key: `--${string}`]: string | number;
+  }
+}
 
 function TestBar () {
 
@@ -68,7 +78,7 @@ function RatingPill({rating}: {rating: string}){
         return <Pill><span className={`${GlyphClass().className} text-xl`}>BBBBB</span></Pill>
     }
 
-    return <Pill>{Number(tempRating.toFixed(1))} <span className={`${GlyphClass().className} text-xl`}>{getStarString(rating)}</span></Pill>
+    return <Pill className="text-yellow-300">{Number(tempRating.toFixed(1))} <span className={`${GlyphClass().className} text-xl`}>{getStarString(rating)}</span></Pill>
 
 }
 
@@ -78,10 +88,10 @@ function BlurShadow({children, style, className}: divCommon){
                 ...style,
                 gridTemplateAreas: "content"
             }}
-            className={`grid relative mb-6 ${className}`}>
+            className={`grid grid-cols-1 grid-rows-1 relative ${className}`}>
                 
                 <div 
-                    className="bg-[rgba(0,0,0,0.35)] blur-xl rounded-lg z-1 min-w-max"
+                    className="bg-[rgba(0,0,0,0.6)] blur-xl rounded-lg z-1 min-w-max"
                     style={{gridArea: "content"}}
                 />
                 <div
@@ -95,7 +105,7 @@ function BlurShadow({children, style, className}: divCommon){
 }
 
 async function getGame(gameid: string){
-    const res = await fetch(`http://localhost:8000/api/games/${gameid}`);
+    const res = await fetch(`${serverURL}/api/games/${gameid}`);
     return (res.ok) ? (await res.json()) : null;
 }
 
@@ -112,10 +122,11 @@ export default function Game({params}: {params: {gameid: string;}}) {
 
     //For game review writing
     const [showReviewPopup,setShowReviewPopup] = useState(false);
+    const [showReviewListPopup,setShowReviewListPopup] = useState(false); //this lists other users review
+    const [showScreenshotPopup,setScreenshotPopup] = useState(false);
 
     //for listing existing game reviews
-    const [myReviewList, setMyReviewList] = useState<JSX.Element[]>([]);
-    //const [myReviewListCount, setMyReviewListCount] = useState(0); //used to distinguish starred reviews and commented reviews
+    const [myReviewList, setMyReviewList] = useState([]);
 
     //Toggles //toggle based trigger
     const [reviewListRefresh, setReviewListRefresh] = useState(false); 
@@ -133,20 +144,8 @@ export default function Game({params}: {params: {gameid: string;}}) {
         const asyncFn = async () => {
             try {
                 const data = await getGameReviews(Number(game_id));
-                const ReactItems: JSX.Element[] = [];
                 setMyReviewList([]) //reset list
-                data.forEach((review: any) => {
-                    if (review.title || review.comment){
-                        ReactItems.push(<Glass key={review.id} className="p-10">
-                                            <div className="flex">
-                                                <H2 className="flex-1">{review.title}</H2>
-                                                <H2 className={`${GlyphClass().className}`}>{getStarString(review.rating)}</H2>
-                                            </div>
-                                            <P>{review.comment}</P>
-                                        </Glass>)
-                    }
-                });
-                setMyReviewList(ReactItems)
+                setMyReviewList(data)
             } catch (error) {
                 console.log("Cannot fetch reviews");
             }
@@ -162,13 +161,16 @@ export default function Game({params}: {params: {gameid: string;}}) {
             setGameId(gameid.toString());
             const gameData = await getGame(gameid);
             if (gameData) {
+
+                const genres = await fetch(`${serverURL}/api/games/genres/${gameid}`);
+
                 setTitle(gameData.title);
                 setDesc(gameData.desc);
                 setRating(gameData.avgrating);
-                setGenres(JSON.parse(gameData.genres));
+                setGenres(genres.ok ? (await genres.json()) : []);
                 
                 await DelayLoad(2000);
-                setGameBackdrop(`http://localhost:8000${gameData.backdropimagepath}`);
+                setGameBackdrop(`${serverURL}${gameData.backdropimagepath}`);
                 setLoading(false);
             }
         };
@@ -191,6 +193,105 @@ export default function Game({params}: {params: {gameid: string;}}) {
         setShowReviewPopup(false)
     };
 
+    const setReviewUI = (array: any): JSX.Element => {
+
+        const defaultNull = <Glass className="p-3"><P className="text-center p-3">No comments found</P></Glass>;
+
+        if (!array || array.length===0) {
+            return defaultNull;
+        }
+
+        if (array.length <=2) {
+            return <>{array.map((review: any) => {
+                    return (review.title || review.comment) ? 
+                        <Glass key={review.id} className="p-10 mb-5 min-h-44 bg-black/36 text-shadow-none">
+                            <div className="flex">
+                                <H2 className="flex-1">{review.title}</H2>
+                                <H2 className={`${GlyphClass().className}`}>{getStarString(review.rating)}</H2>
+                            </div>
+                            <P className="line-clamp-2">{review.comment}</P>
+                        </Glass>
+                         : null;
+                    })}
+                    <P onClick={()=>{setShowReviewListPopup(true);hideHeaderFn(true);}} className="text-center cursor-pointer p-3">View more...</P>
+                    </>
+        }
+
+        if (array.length > 2) {
+
+            //to select reviews with only title anc comment
+            const visibleList = [];
+            for (let i = 0; (visibleList.length <= 1 && i < array.length); i++) {
+                if (array[i].title || array[i].comment) {
+                    visibleList.push(array[i]);
+                }
+            }
+
+            return <>
+                {visibleList.map((review: any)=> {
+                    return <Glass key={review.id} className="p-10 mb-5 min-h-44 bg-black/36 text-shadow-none">
+                                <div className="flex">
+                                    <H2 className="flex-1">{review.title}</H2>
+                                    <H2 className={`${GlyphClass().className}`}>{getStarString(review.rating)}</H2>
+                                </div>
+                                <P className="line-clamp-2">{review.comment}</P>
+                            </Glass>
+                })}
+
+                <P onClick={()=>{setShowReviewListPopup(true);hideHeaderFn(true);}} className="text-center cursor-pointer p-3">View more...</P>
+            </>
+        }
+
+        return defaultNull;
+
+    };
+
+    const setScreenshotsUI = (count: number): JSX.Element => {
+
+        const plusArb_N = (count>4) ? (count-4) : 0;
+
+        const styleTest: React.CSSProperties = {
+          backgroundImage: `url('/tuesday.png')`,
+          backgroundSize: 'cover',
+        };
+        const V: React.ReactNode = 
+        <Glass onClick={()=>{setScreenshotPopup(true);hideHeaderFn(true);}} className="p-3 min-h-50 text-center min-w-auto" style={styleTest}>
+              
+        </Glass>;
+        const X: React.ReactNode = 
+        <div>
+            <Glass className="p-3 min-h-50 text-center min-w-auto" style={styleTest}>
+                <Glass onClick={()=>{setScreenshotPopup(true);hideHeaderFn(true);}} className="m-0 p-0 backdrop-blur-none border-none absolute bg-contain inset-0 -z-10 bg-black/40 overflow-hidden flex justify-center items-center">
+                    <H1 className="text-5xl font-light">{plusArb_N}+</H1>
+                </Glass>
+            </Glass>
+        </div>
+
+        const defaultElement = <div className="grid grid-cols-2 gap-5 mt-11">
+            {V}
+            {V}
+            {V}
+            {(plusArb_N!==0) ? X : V}
+        </div>
+
+        if (count>4) {
+            return defaultElement
+        } else {
+            const Vx: JSX.Element[] = []
+            for (let index = 0; index < count; index++) {
+                Vx.push(V)
+            }
+            return <>
+                <div className="grid grid-cols-2 gap-5 mt-11">
+                    {Vx.map((n) => {
+                        return n
+                    })}
+                </div>
+            </>
+        }
+
+    }
+
     //Only render review panel add button if logged in
     const ReviewPanel = (loggedIn) ? (
         <Glass className="max-h-min p-3 flex justify-center align-middle ml-6 text-7xl rounded-[100px]" onClick={()=>{setShowReviewPopup(true);hideHeaderFn(true);}}>
@@ -205,24 +306,33 @@ export default function Game({params}: {params: {gameid: string;}}) {
         {
             (showReviewPopup) ? (<Review gameid={Number(game_id)} effectReturnFn={responseReactPopup} />) : (null)
         }
+        {/* Game Review reading panel */}
+        {
+            (showReviewListPopup) ? ReviewViewPanel(myReviewList, ()=>{setShowReviewListPopup(false);hideHeaderFn(false);}) : null
+        }
+        {/* Game Review reading panel */}
+        {
+            (showScreenshotPopup) ? ScreenshotViewPanel(()=>{setScreenshotPopup(false);hideHeaderFn(false);}) : null
+        }
         <div className="m-14 ml-40 mr-40">
             <div className="mt-8 mb-8 min-h-[60vh] flex">
                 
                 <div className="flex-3">
                     <div className="max-w-1/2" style={{/*textShadow: `3px 3px 15px rgb(10,10,10), 0 0 15px rgb(10,10,10), 0 0 15px rgb(10,10,10), 0 0 15px rgb(10,10,10)`*/}}>
 
-                        <H1 style={{textShadow: `0px 0px 50px rgba(0,0,0,0.7), 0px 0px 50px rgba(0,0,0,0.7)`}}>{title}</H1>
+                        <H1 style={{textShadow: `0px 0px 50px rgba(0,0,0,1), 0px 0px 50px rgba(0,0,0,1), 0px 0px 25px rgba(0,0,0,1)`}}>{title}</H1>
 
-                        <BlurShadow className="text-left">
-                            <P className="font-extrabold">{desc}</P>
+                        <BlurShadow className="text-left mb-6">
+                            {/*<P className="font-extrabold whitespace-pre-line">{desc}</P>*/}
+                            {<p className="font-extrabold whitespace-pre-line">{desc}</p>}
                         </BlurShadow>
 
                         <PillContainer>
                             <RatingPill rating={rating}/>
                         </PillContainer>
                         <PillContainer>
-                            {genres.map((genre) => {
-                                return <Pill key={genre}>{genre}</Pill>;
+                            {genres.map((genre: any) => {
+                                return <Pill onClick={()=>{}} style={{ '--dynamic-color': genre.themecolor }} className="hover:bg-(--dynamic-color)" key={genre.id}>{genre.title}</Pill>;
                             })}
                         </PillContainer>
                     </div>
@@ -232,30 +342,25 @@ export default function Game({params}: {params: {gameid: string;}}) {
             <FlexContainer>
                 <GamePanel className="flex-1">
                     <div className="flex mb-6">
-                        <H1 className="">Reviews</H1>
+                        <H1 className="flex-1">Reviews</H1>
                         {(showReviewPopup) ? null : ReviewPanel}
                     </div>
 
                     {/* Game reviewing panel (check up) */}
 
                     {/* others reviews (myReviewList) */}
-                    <div className="grid grid-cols-2 gap-5">
-                        {
-                            (myReviewList.length!==0) ? 
-                            myReviewList.map((review: any) => {
-                                return review;
-                            }) : <div><P className="text-center p-3">No comments found</P></div>
-                        }
+                    <div className="">
+                        {setReviewUI(myReviewList)}
                     </div>
 
                 </GamePanel>
-            </FlexContainer>
 
-            <FlexContainer>
-                <GamePanel className="overflow-hidden">
+                <GamePanel className="flex-1 overflow-hidden">
                     <H1>Screenshots</H1>
-                    <TestBar2/>
+                    {/*<TestBar2/>*/}
+                    {setScreenshotsUI(5)}
                 </GamePanel>
+
             </FlexContainer>
 
         </div>

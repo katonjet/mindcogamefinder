@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const baseURL_env = (process.env.AXIOS_BASE_URL) ? process.env.AXIOS_BASE_URL : 'http://localhost:8000';
+export const serverURL = (process.env.NEXT_PUBLIC_AXIOS_BASE_URL) ? process.env.NEXT_PUBLIC_AXIOS_BASE_URL : '';
 
-console.log(baseURL_env)
+console.log(serverURL)
 
 const api = axios.create({
-    baseURL: baseURL_env,
+    baseURL: serverURL,
     withCredentials: true,
     withXSRFToken: true,
     xsrfHeaderName: "X-XSRF-TOKEN"

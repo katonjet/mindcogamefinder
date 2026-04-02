@@ -105,7 +105,7 @@ export default function ReviewPopup(
 
     return <div className="grid items-center justify-center bg-black/60 backdrop-blur-3xl fixed min-h-screen min-w-screen z-10">
         <div className="min-w-4xl w-4xl max-h-fit h-fit">
-            <Glass className="p-4">
+            <Glass className="p-4 bg-white/10">
                 
                 <div className="flex flex-row">
                     <div className="flex-1"></div>

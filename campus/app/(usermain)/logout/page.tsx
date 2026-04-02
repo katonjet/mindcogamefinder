@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { logoutUser } from "@/lib/user";
+import LoadingPage from "@/app/frontend/LoadingPage";
 
 export default function LogOutUser(){
 
@@ -25,6 +26,6 @@ export default function LogOutUser(){
 
     }, []);
 
-    return <><p>Logging out......</p></>;
+    return LoadingPage();
 
 }
