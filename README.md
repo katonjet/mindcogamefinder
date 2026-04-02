@@ -54,7 +54,6 @@ Then install dependencies using composer and npm:
 Next, setup the database:
 ```bash
     php artisan migrate # init DB and schemas
-    php artisan db:seed --class=GameSample # load preset game
     php artisan db:seed --class=UserSeed # load preset user
 ```
 
@@ -64,7 +63,7 @@ Next, setup the configs:
     php artisan config:cache
 ```
 
-Next, write [Laravel environment file](#laravel-environment-file) to ```.env``` file.
+Next, write [Laravel environment file](#laravel-environment-file) to ```.env``` file. You will also need to **ENTER THE PROVIDED API KEY FROM RAWG.IO** to the same ```.env``` file as this will download game data.
 
 Lastly, run the Laravel server (Use only this step after setup):
 ```bash
@@ -93,7 +92,9 @@ Lastly, run the Next.js server (Use only this step after setup):
 
 ## HOW-TO test site
 
-Visit [http://localhost:3000](http://localhost:3000) and feel free to explore
+Visit [http://localhost:3000](http://localhost:3000) and feel free to explore.
+
+> **IMPORTANT**: Visiting for the first time will take a while to load due to the download process.
 
 ### User credentials for testing (from seeding)
 ```
@@ -114,6 +115,8 @@ APP_URL=http://localhost:8000
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
 APP_FAKER_LOCALE=en_US
+
+RAWG_KEY=`RAWG API KEY` #See API docs of RAWG.IO
 
 APP_MAINTENANCE_DRIVER=file
 # APP_MAINTENANCE_STORE=database
@@ -180,5 +183,5 @@ VITE_APP_NAME="${APP_NAME}"
 ### Next.js Environment file
 ```.env
 NEXT_TELEMETRY_DISABLED=1 # Turns off data collection
-AXIOS_BASE_URL=http://localhost:8000 # for @/lib/axios.ts file
+NEXT_PUBLIC_AXIOS_BASE_URL=http://localhost:8000 # for @/lib/axios.ts file
 ```
