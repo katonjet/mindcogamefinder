@@ -11,4 +11,11 @@ class Gameplatformrelate extends Model
         'game_id',
         'systemplatform_id',
         ];
+
+    public function game(){
+        return $this->belongsTo(Game::class);
+    }
+    public function systemplatform(){
+        return $this->belongsTo(Systemplatform::class);
+    }
 }

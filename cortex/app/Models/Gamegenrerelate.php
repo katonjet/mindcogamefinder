@@ -11,4 +11,11 @@ class Gamegenrerelate extends Model
         'game_id',
         'genre_id',
         ];
+
+    public function game(){
+        return $this->belongsTo(Game::class);
+    }
+    public function genre(){
+        return $this->belongsTo(Genre::class);
+    }
 }

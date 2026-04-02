@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Game;
 use App\Models\Gamegenrerelate;
+use App\Models\Gameplatformrelate;
 use App\Models\Genre;
+use App\Models\Systemplatform;
 use Illuminate\Http\Request;
 
 class GameController extends Controller
@@ -15,10 +17,10 @@ class GameController extends Controller
     public function index()
     {
         $games = Game::orderBy('updated_at', 'desc')
-                    ->limit(20)
-                    ->get();
+            ->limit(20)
+            ->get();
 
-        return $games ? response()->json($games) : response()->json(null, 404);       
+        return $games ? response()->json($games) : response()->json(null, 404);
     }
 
     /**
@@ -38,11 +40,43 @@ class GameController extends Controller
         return $game ? response()->json($game) : response()->json(null, 404);
     }
 
-    public function getGenres(Game $game){
+    public function getGenres(Game $game)
+    {
         if ($game) {
             $genreIds = Gamegenrerelate::select('genre_id')->where('game_id', $game->id)->distinct();
             $genres = Genre::whereIn('id', $genreIds)->get();
             return $genres ? response()->json($genres) : response()->json(null, 404);
+        }
+
+        return response()->json(null, 404);
+    }
+
+    public function getPlatforms(Game $game)
+    {
+        if ($game) {
+            $pId = Gameplatformrelate::select('systemplatform_id')->where('game_id', $game->id)->distinct();
+            $platforms = Systemplatform::whereIn('id', $pId)->get();
+            return $platforms ? response()->json($platforms) : response()->json(null, 404);
+        }
+
+        return response()->json(null, 404);
+    }
+
+    public function getGamesByGenre(Genre $g)
+    {
+        if ($g) {
+            $games = Gamegenrerelate::with('game')->with('genre:id,title,themecolor')->orderBy('updated_at', 'desc')->where('genre_id', $g->id)->get();
+            return $games ? response()->json($games) : response()->json(null, 404);
+        }
+
+        return response()->json(null, 404);
+    }
+
+    public function getGamesByPlatform(Systemplatform $p)
+    {
+        if ($p) {
+            $games = Gameplatformrelate::with('game')->with('systemplatform:id,title,themecolor')->orderBy('updated_at', 'desc')->where('systemplatform_id', $p->id)->get();
+            return $games ? response()->json($games) : response()->json(null, 404);
         }
 
         return response()->json(null, 404);
