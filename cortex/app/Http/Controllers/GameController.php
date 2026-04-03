@@ -23,6 +23,14 @@ class GameController extends Controller
         return $games ? response()->json($games) : response()->json(null, 404);
     }
 
+    public function searchGames(Request $request){
+        $searchQuery = $request->input('q');
+
+        $games = Game::where('title', 'like', "%{$searchQuery}%")->get();
+
+        return $games ? response()->json($games) : response()->json(null, 404);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

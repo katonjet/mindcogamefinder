@@ -1,0 +1,63 @@
+"use client";
+
+import { H1, P } from "@/app/frontend/Common";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Glass } from "@/app/frontend/Glass";
+import Link from "next/link";
+import { serverURL } from "@/lib/axios";
+import { GlyphClass } from "@/app/frontend/Glyphs";
+import LoadingPage, { DelayLoad } from "@/app/frontend/LoadingPage";
+
+export default function Search(){
+
+    const searchParams = useSearchParams();
+    const query = searchParams.get('q') || '';
+    const [gameList, setGameList] = useState<any>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(()=>{
+            const asyncFn = async () => {
+                setLoading(true)
+
+                try {
+                    const data = await (await fetch(`${serverURL}/api/game/search?q=${query}`)).json();
+                    setGameList(data)
+
+                    await DelayLoad(2000);
+                    setLoading(false)
+                } catch (error) {
+                    const errorMsg = (error instanceof Error)? (`${error.name}: ${error.message}`) : String(error) 
+                    console.error(errorMsg)
+                }
+    
+            }
+            asyncFn()
+    },[query]);
+
+    const renderDefault = <div className="pl-40 pr-40 pt-14 pb-20">
+
+        <H1 className="mb-7">Search results for '{query}'</H1>
+
+        <div className="grid grid-cols-3 gap-5">
+            {Array.from(gameList).map((game: any)=>{
+                return  <Link key={game.id} className="" href={`/game/${game.id}`}>
+                    <Glass  className="p-0 z-3 flex flex-col-reverse min-w-[450px] min-h-[254px] overflow-hidden relative snap-start bg-cover bg-center" 
+                            style={{boxShadow: 'none' , backgroundImage: `url(${serverURL}${game.backdropimagepath})` }}
+                      >
+                      <Glass className="fixed z-2 min-h-full min-w-full backdrop-blur-none bg-transparent cursor-pointer">
+                      </Glass>
+                      <div className="fixed z-1 p-4 text-2xl min-w-full backdrop-blur-xs min-h-max line-clamp-2 bg-black/40">
+                        <P>{game.title}</P>
+                        <P className="font-extrabold text-yellow-500"><span className={GlyphClass().className}>F</span> {Number(game.avgrating).toFixed(1)}</P>
+                      </div>
+                    </Glass>
+                  </Link>
+            })}
+        </div>
+
+    </div>;
+
+    return loading ? LoadingPage() : renderDefault;
+
+}

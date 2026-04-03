@@ -17,6 +17,7 @@ Route::post('uploadgamebackdrop', [FileUploadTest::class, 'uploadGameBackdrop'])
 
 Route::apiResource('games', GameController::class)->middleware(BuildGameLibrary::class);
 Route::get('games/genres/{game}', [GameController::class, 'getGenres']);
+Route::get('game/search', [GameController::class, 'searchGames']);
 Route::get('games/platforms/{game}', [GameController::class, 'getPlatforms']);
 Route::get('games/bygenre/{g}', [GameController::class, 'getGamesByGenre']); //return games by genres
 Route::get('games/byplatform/{p}', [GameController::class, 'getGamesByPlatform']); //return games by platforms
